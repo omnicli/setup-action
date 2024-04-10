@@ -1,0 +1,26 @@
+up:
+  - node: 20.6.0
+  - custom:
+      name: Install dependencies
+      command: npm install
+
+commands:
+  prettier:
+    desc: 'Run prettier'
+    run: npx prettier --write .
+
+  bundle:
+    desc: 'Build the bundle'
+    run: npm run bundle
+
+  test:
+    desc: 'Run tests'
+    run: npm test
+
+  lint:
+    desc: 'Run linter'
+    run: npm run lint
+
+  release:
+    desc: 'Release a new version'
+    run: ./scripts/release.sh
