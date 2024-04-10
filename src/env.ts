@@ -40,12 +40,7 @@ export async function setEnv(version: string): Promise<void> {
   // Make sure that ~/.config/omni/config.yaml exists even
   // if empty, so that omni won't trigger any bootstrap
   const configPath = path.join(os.homedir(), '.config', 'omni', 'config.yaml')
-  if (
-    !fs.promises
-      .access(configPath, fs.constants.F_OK)
-      .then(() => true)
-      .catch(() => false)
-  ) {
+  if (!fs.existsSync(configPath)) {
     actionsCore.info(`Creating ${configPath}`)
     await fs.promises.mkdir(path.dirname(configPath), { recursive: true })
     await fs.promises.writeFile(configPath, '')
