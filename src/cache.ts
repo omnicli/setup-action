@@ -1,3 +1,5 @@
+import * as path from 'path'
+
 import * as actionsCache from '@actions/cache'
 import * as actionsCore from '@actions/core'
 import * as actionsGlob from '@actions/glob'
@@ -57,7 +59,10 @@ export async function restoreCache(): Promise<void> {
   actionsCore.startGroup('Restoring cache for omni')
 
   const cachePaths = [omniDataHome(), omniCacheHome()]
-  const cacheHashPaths = [omniDataHome()]
+  const cacheHashPaths = [
+    omniDataHome(),
+    `!${path.join(omniDataHome(), 'shims')}`
+  ]
 
   const fileHash = await actionsGlob.hashFiles([`.omni.yaml`].join('\n'))
   const prefix = actionsCore.getInput('cache_key_prefix') || 'omni'

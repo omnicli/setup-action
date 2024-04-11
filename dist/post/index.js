@@ -86842,6 +86842,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.restoreCache = exports.saveCache = exports.hashCache = void 0;
+const path = __importStar(__nccwpck_require__(1017));
 const actionsCache = __importStar(__nccwpck_require__(7799));
 const actionsCore = __importStar(__nccwpck_require__(2186));
 const actionsGlob = __importStar(__nccwpck_require__(8090));
@@ -86894,7 +86895,10 @@ exports.saveCache = saveCache;
 async function restoreCache() {
     actionsCore.startGroup('Restoring cache for omni');
     const cachePaths = [(0, env_1.omniDataHome)(), (0, env_1.omniCacheHome)()];
-    const cacheHashPaths = [(0, env_1.omniDataHome)()];
+    const cacheHashPaths = [
+        (0, env_1.omniDataHome)(),
+        `!${path.join((0, env_1.omniDataHome)(), 'shims')}`
+    ];
     const fileHash = await actionsGlob.hashFiles([`.omni.yaml`].join('\n'));
     const prefix = actionsCore.getInput('cache_key_prefix') || 'omni';
     const full_key_prefix = `${prefix}-${(0, utils_1.getCurrentPlatform)()}-${(0, utils_1.getCurrentArch)()}`;
@@ -87229,7 +87233,7 @@ async function omniHookEnv() {
     return env;
 }
 exports.omniHookEnv = omniHookEnv;
-const omniReshim = async () => omni(['reshim']);
+const omniReshim = async () => omni(['config', 'reshim']);
 exports.omniReshim = omniReshim;
 
 

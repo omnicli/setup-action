@@ -102,4 +102,5 @@ export async function omniHookEnv(): Promise<OmniEnvOperation[]> {
   return env
 }
 
-export const omniReshim = async (): Promise<number> => omni(['config', 'reshim'])
+export const omniReshim = async (): Promise<number> =>
+  omni(['config', 'reshim'])
