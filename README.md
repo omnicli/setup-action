@@ -1,6 +1,6 @@
 # Setup Omni Action
 
-[![GitHub Super-Linter](https://github.com/omnicli/setup-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
+[![GitHub Super-Linter](https://github.com/omnicli/setup-action/actions/workflows/linter.yml/badge.svg)](https://github.com/omnicli/setup-action/actions/workflows/linter.yml)
 ![CI](https://github.com/omnicli/setup-action/actions/workflows/ci.yml/badge.svg)
 [![Check dist/](https://github.com/omnicli/setup-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/omnicli/setup-action/actions/workflows/check-dist.yml)
 [![CodeQL](https://github.com/omnicli/setup-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/omnicli/setup-action/actions/workflows/codeql-analysis.yml)

@@ -23,15 +23,13 @@ export async function run_index(): Promise<void> {
       throw new Error(`Invalid version: ${version}`)
     }
 
-    if (semver.satisfies(version, '>=0.0.24')) {
-      await omniTrust()
-    } else {
-      await setOrg()
-    }
+    const trusted = semver.satisfies(version, '>=0.0.24')
+      ? (await omniTrust()) === 0
+      : await setOrg()
 
     const runUp = actionsCore.getBooleanInput('up')
     if (runUp) {
-      await omniUp(version)
+      await omniUp(trusted)
     }
 
     if (semver.satisfies(version, '>=0.0.24')) {

@@ -91277,18 +91277,10 @@ async function setOrg() {
     // will thus refer to the current repository (the action) instead of
     // the repository calling the action
     const context = actionsGithub.context;
-    let repository = context.payload.repository?.name;
-    let owner = context.payload.repository?.owner.login;
-    if (!repository || !owner) {
-        actionsCore.warning('Could not get the repository from the payload');
-        // If we can't get the repository from the payload, we will
-        // try to get it from the environment variables
-        repository = context.repo.repo;
-        owner = context.repo.owner;
-    }
-    if (repository && owner) {
+    try {
+        const { owner, repo } = context.repo;
         const { OMNI_ORG } = process.env;
-        const currentRepository = `${context.serverUrl}/${owner}/${repository}`;
+        const currentRepository = `${context.serverUrl}/${owner}/${repo}`;
         const currentOrg = `${context.serverUrl}/${owner}`;
         const currentOmniOrg = OMNI_ORG && OMNI_ORG.trim() !== '' ? OMNI_ORG.trim().split(',') : [];
         for (const org of [currentRepository, currentOrg]) {
@@ -91298,12 +91290,12 @@ async function setOrg() {
         }
         actionsCore.info(`Setting OMNI_ORG=${currentOmniOrg.join(',')}`);
         actionsCore.exportVariable('OMNI_ORG', currentOmniOrg.join(','));
+        return true;
     }
-    else {
-        if (!repository)
-            actionsCore.warning('Could not get the repository name');
-        if (!owner)
-            actionsCore.warning('Could not get the repository owner');
+    catch (e) {
+        actionsCore.warning(`Failed to get repository information: ${e}`);
+        actionsCore.warning('Repository will not be trusted');
+        return false;
     }
 }
 exports.setOrg = setOrg;
@@ -91400,15 +91392,12 @@ async function run_index() {
         if (!semver.valid(version)) {
             throw new Error(`Invalid version: ${version}`);
         }
-        if (semver.satisfies(version, '>=0.0.24')) {
-            await (0, omni_1.omniTrust)();
-        }
-        else {
-            await (0, env_1.setOrg)();
-        }
+        const trusted = semver.satisfies(version, '>=0.0.24')
+            ? (await (0, omni_1.omniTrust)()) === 0
+            : await (0, env_1.setOrg)();
         const runUp = actionsCore.getBooleanInput('up');
         if (runUp) {
-            await (0, omni_1.omniUp)(version);
+            await (0, omni_1.omniUp)(trusted);
         }
         if (semver.satisfies(version, '>=0.0.24')) {
             await (0, omni_1.omniReshim)();
@@ -91466,7 +91455,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.omniReshim = exports.omniTrust = exports.omniHookEnv = exports.omniVersion = exports.omniUp = void 0;
-const semver = __importStar(__nccwpck_require__(1383));
 const actionsCore = __importStar(__nccwpck_require__(2186));
 const actionsExec = __importStar(__nccwpck_require__(1514));
 // @ts-expect-error There is no declaration file for this package
@@ -91489,9 +91477,9 @@ const omniOutput = async (args) => actionsCore.group(`Running omni ${args.join('
     });
     return { returnCode, stdout, stderr };
 });
-async function omniUp(version) {
+async function omniUp(trusted) {
     const up_args = (0, shell_quote_1.parse)(actionsCore.getInput('up_args').trim());
-    if (semver.satisfies(version, '<0.0.24')) {
+    if (!trusted) {
         up_args.push(...['--trust', 'always']);
     }
     return omni(['up', ...up_args]);
@@ -91523,7 +91511,7 @@ async function omniHookEnv() {
             continue;
         }
         // Try to parse the line as an export operation
-        const exportOp = line.match(/^export (\S+)=(['"])(.*)\2$/);
+        const exportOp = line.match(/^export (\S+)=(['"])?(.*)\2$/);
         if (exportOp) {
             const [, key, , value] = exportOp;
             env.push({ operation: 'export', key, value });

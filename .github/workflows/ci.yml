@@ -66,25 +66,3 @@ jobs:
       - name: Print Output
         id: output
         run: echo "${{ toJSON(steps.test-action.outputs) }}"
-
-  test-blah:
-    name: Blah Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-
-      - name: Print environment
-        id: env
-        run: printenv | sort
-
-      - name: Install omni
-        uses: omnicli/setup-action@v0.0.1
-        with:
-          up: true
-
-      - name: Show omni status
-        shell: bash
-        run: omni status

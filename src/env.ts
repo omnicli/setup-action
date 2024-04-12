@@ -35,7 +35,7 @@ export function omniCacheHome(): string {
   return cacheHome
 }
 
-export async function setOrg(): Promise<void> {
+export async function setOrg(): Promise<boolean> {
   // Add the current github repository as trusted using the OMNI_ORG
   // environment variable, this will allow the user to use the omni
   // commands without having to trust the repository
@@ -46,22 +46,11 @@ export async function setOrg(): Promise<void> {
   // the repository calling the action
 
   const context = actionsGithub.context
-  let repository = context.payload.repository?.name
-  let owner = context.payload.repository?.owner.login
-
-  if (!repository || !owner) {
-    actionsCore.warning('Could not get the repository from the payload')
-
-    // If we can't get the repository from the payload, we will
-    // try to get it from the environment variables
-    repository = context.repo.repo
-    owner = context.repo.owner
-  }
-
-  if (repository && owner) {
+  try {
+    const { owner, repo } = context.repo
     const { OMNI_ORG } = process.env
 
-    const currentRepository = `${context.serverUrl}/${owner}/${repository}`
+    const currentRepository = `${context.serverUrl}/${owner}/${repo}`
     const currentOrg = `${context.serverUrl}/${owner}`
 
     const currentOmniOrg =
@@ -73,9 +62,13 @@ export async function setOrg(): Promise<void> {
     }
     actionsCore.info(`Setting OMNI_ORG=${currentOmniOrg.join(',')}`)
     actionsCore.exportVariable('OMNI_ORG', currentOmniOrg.join(','))
-  } else {
-    if (!repository) actionsCore.warning('Could not get the repository name')
-    if (!owner) actionsCore.warning('Could not get the repository owner')
+
+    return true
+  } catch (e) {
+    actionsCore.warning(`Failed to get repository information: ${e}`)
+    actionsCore.warning('Repository will not be trusted')
+
+    return false
   }
 }
 

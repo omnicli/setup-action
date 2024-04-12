@@ -1,5 +1,3 @@
-import * as semver from 'semver'
-
 import * as actionsCore from '@actions/core'
 import * as actionsExec from '@actions/exec'
 
@@ -37,9 +35,9 @@ const omniOutput = async (args: string[]): Promise<ExecOutput> =>
     }
   )
 
-export async function omniUp(version: string): Promise<number> {
+export async function omniUp(trusted: boolean): Promise<number> {
   const up_args = parse(actionsCore.getInput('up_args').trim())
-  if (semver.satisfies(version, '<0.0.24')) {
+  if (!trusted) {
     up_args.push(...['--trust', 'always'])
   }
   return omni(['up', ...up_args])
@@ -85,7 +83,7 @@ export async function omniHookEnv(): Promise<OmniEnvOperation[]> {
     }
 
     // Try to parse the line as an export operation
-    const exportOp = line.match(/^export (\S+)=(['"])(.*)\2$/)
+    const exportOp = line.match(/^export (\S+)=(['"])?(.*)\2$/)
     if (exportOp) {
       const [, key, , value] = exportOp
       env.push({ operation: 'export', key, value })
