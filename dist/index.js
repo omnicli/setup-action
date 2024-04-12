@@ -86900,7 +86900,7 @@ async function restoreCache() {
         `!${path.join((0, env_1.omniDataHome)(), 'shims')}`
     ];
     const fileHash = await actionsGlob.hashFiles([`.omni.yaml`].join('\n'));
-    const prefix = actionsCore.getInput('cache_key_prefix') || 'omni';
+    const prefix = actionsCore.getInput('cache_key_prefix') || 'omni-v0';
     const full_key_prefix = `${prefix}-${(0, utils_1.getCurrentPlatform)()}-${(0, utils_1.getCurrentArch)()}`;
     const primaryKey = `${full_key_prefix}-${fileHash}`;
     const restoreKeys = [`${full_key_prefix}-`];
