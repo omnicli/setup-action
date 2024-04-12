@@ -49,7 +49,7 @@ function setInputValues(
   const inputs: Record<string, string | boolean> = {
     cache: true,
     cache_write: true,
-    cache_key_prefix: 'omni',
+    cache_key_prefix: 'omni-v0',
     up: false,
     up_args: '',
     version: ''

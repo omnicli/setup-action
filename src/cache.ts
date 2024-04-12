@@ -65,7 +65,7 @@ export async function restoreCache(): Promise<void> {
   ]
 
   const fileHash = await actionsGlob.hashFiles([`.omni.yaml`].join('\n'))
-  const prefix = actionsCore.getInput('cache_key_prefix') || 'omni'
+  const prefix = actionsCore.getInput('cache_key_prefix') || 'omni-v0'
   const full_key_prefix = `${prefix}-${getCurrentPlatform()}-${getCurrentArch()}`
   const primaryKey = `${full_key_prefix}-${fileHash}`
   const restoreKeys = [`${full_key_prefix}-`]

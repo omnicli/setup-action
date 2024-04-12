@@ -42,7 +42,7 @@ inputs:
       'The prefix to use for the cache key; if changed, the cache will be
       invalidated'
     required: false
-    default: 'omni'
+    default: 'omni-v0'
 
 outputs:
   cache-hit:
