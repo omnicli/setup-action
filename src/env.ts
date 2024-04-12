@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
 
+import * as actionsGithub from '@actions/github'
 import * as actionsCore from '@actions/core'
 
 import { omniHookEnv } from './omni'
@@ -32,6 +33,50 @@ export function omniCacheHome(): string {
 
   actionsCore.saveState('OMNI_CACHE_HOME', cacheHome)
   return cacheHome
+}
+
+export async function setOrg(): Promise<void> {
+  // Add the current github repository as trusted using the OMNI_ORG
+  // environment variable, this will allow the user to use the omni
+  // commands without having to trust the repository
+  //
+  // We will try to get the information from the github context since
+  // we will be running in a github action context, and the environment
+  // will thus refer to the current repository (the action) instead of
+  // the repository calling the action
+
+  const context = actionsGithub.context
+  let repository = context.payload.repository?.name
+  let owner = context.payload.repository?.owner.login
+
+  if (!repository || !owner) {
+    actionsCore.warning('Could not get the repository from the payload')
+
+    // If we can't get the repository from the payload, we will
+    // try to get it from the environment variables
+    repository = context.repo.repo
+    owner = context.repo.owner
+  }
+
+  if (repository && owner) {
+    const { OMNI_ORG } = process.env
+
+    const currentRepository = `${context.serverUrl}/${owner}/${repository}`
+    const currentOrg = `${context.serverUrl}/${owner}`
+
+    const currentOmniOrg =
+      OMNI_ORG && OMNI_ORG.trim() !== '' ? OMNI_ORG.trim().split(',') : []
+    for (const org of [currentRepository, currentOrg]) {
+      if (!currentOmniOrg.includes(org)) {
+        currentOmniOrg.push(org)
+      }
+    }
+    actionsCore.info(`Setting OMNI_ORG=${currentOmniOrg.join(',')}`)
+    actionsCore.exportVariable('OMNI_ORG', currentOmniOrg.join(','))
+  } else {
+    if (!repository) actionsCore.warning('Could not get the repository name')
+    if (!owner) actionsCore.warning('Could not get the repository owner')
+  }
 }
 
 export async function setEnv(version: string): Promise<void> {
@@ -71,26 +116,4 @@ export async function setEnv(version: string): Promise<void> {
       }
     }
   }
-
-  // Add the current github repository as trusted using the OMNI_ORG
-  // environment variable, this will allow the user to use the omni
-  // commands without having to trust the repository
-  const {
-    GITHUB_REPOSITORY,
-    GITHUB_REPOSITORY_OWNER,
-    GITHUB_SERVER_URL,
-    OMNI_ORG
-  } = process.env
-  const currentRepository = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}`
-  const currentOrg = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY_OWNER}`
-
-  const currentOmniOrg =
-    OMNI_ORG && OMNI_ORG.trim() !== '' ? OMNI_ORG.trim().split(',') : []
-  for (const org of [currentRepository, currentOrg]) {
-    if (!currentOmniOrg.includes(org)) {
-      currentOmniOrg.push(org)
-    }
-  }
-  actionsCore.info(`Setting OMNI_ORG=${currentOmniOrg.join(',')}`)
-  actionsCore.exportVariable('OMNI_ORG', currentOmniOrg.join(','))
 }

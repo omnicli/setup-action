@@ -1,3 +1,5 @@
+import * as semver from 'semver'
+
 import * as actionsCore from '@actions/core'
 import * as actionsExec from '@actions/exec'
 
@@ -35,8 +37,11 @@ const omniOutput = async (args: string[]): Promise<ExecOutput> =>
     }
   )
 
-export async function omniUp(): Promise<number> {
+export async function omniUp(version: string): Promise<number> {
   const up_args = parse(actionsCore.getInput('up_args').trim())
+  if (semver.satisfies(version, '<0.0.24')) {
+    up_args.push(...['--trust', 'always'])
+  }
   return omni(['up', ...up_args])
 }
 
@@ -101,6 +106,8 @@ export async function omniHookEnv(): Promise<OmniEnvOperation[]> {
 
   return env
 }
+
+export const omniTrust = async (): Promise<number> => omni(['config', 'trust'])
 
 export const omniReshim = async (): Promise<number> =>
   omni(['config', 'reshim'])

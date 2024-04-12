@@ -20,6 +20,7 @@ const saveCacheMock = jest.spyOn(cache, 'saveCache')
 
 // Mock the env functions
 const setEnvMock = jest.spyOn(env, 'setEnv')
+const setOrgMock = jest.spyOn(env, 'setOrg')
 
 // Mock the main functions
 const runIndexMock = jest.spyOn(main, 'run_index')
@@ -28,18 +29,16 @@ const runPostMock = jest.spyOn(main, 'run_post')
 // Mock the omni functions
 const omniVersionMock = jest.spyOn(omni, 'omniVersion')
 const omniUpMock = jest.spyOn(omni, 'omniUp')
+const omniTrustMock = jest.spyOn(omni, 'omniTrust')
 const omniReshimMock = jest.spyOn(omni, 'omniReshim')
 
 // Mock the setup functions
 const setupMock = jest.spyOn(setup, 'setup')
 
 // Mock the GitHub Actions core library
-// let debugMock: jest.SpiedFunction<typeof actionsCore.debug>
-// let errorMock: jest.SpiedFunction<typeof actionsCore.error>
 let getInputMock: jest.SpiedFunction<typeof actionsCore.getInput>
 let getBooleanInputMock: jest.SpiedFunction<typeof actionsCore.getBooleanInput>
 let setFailedMock: jest.SpiedFunction<typeof actionsCore.setFailed>
-// let setOutputMock: jest.SpiedFunction<typeof actionsCore.setOutput>
 
 function setInputValues(
   getInput: jest.SpiedFunction<typeof actionsCore.getInput>,
@@ -94,6 +93,8 @@ describe('action', () => {
     restoreCacheMock.mockResolvedValue()
     setupMock.mockResolvedValue()
     omniVersionMock.mockResolvedValue('0.0.23')
+    omniTrustMock.mockResolvedValue(0)
+    setOrgMock.mockResolvedValue()
     omniUpMock.mockResolvedValue(0)
     omniReshimMock.mockResolvedValue(0)
     setEnvMock.mockResolvedValue()
@@ -105,6 +106,8 @@ describe('action', () => {
     expect(restoreCacheMock).toHaveBeenCalledTimes(1)
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).not.toHaveBeenCalled()
+    expect(setOrgMock).toHaveBeenCalledTimes(1)
     expect(omniUpMock).not.toHaveBeenCalled()
     expect(omniReshimMock).not.toHaveBeenCalled()
     expect(setEnvMock).toHaveBeenCalledTimes(1)
@@ -119,6 +122,8 @@ describe('action', () => {
     restoreCacheMock.mockResolvedValue()
     setupMock.mockResolvedValue()
     omniVersionMock.mockResolvedValue('0.0.23')
+    omniTrustMock.mockResolvedValue(0)
+    setOrgMock.mockResolvedValue()
     omniUpMock.mockResolvedValue(0)
     omniReshimMock.mockResolvedValue(0)
     setEnvMock.mockResolvedValue()
@@ -130,6 +135,8 @@ describe('action', () => {
     expect(restoreCacheMock).not.toHaveBeenCalled()
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).not.toHaveBeenCalled()
+    expect(setOrgMock).toHaveBeenCalledTimes(1)
     expect(omniUpMock).not.toHaveBeenCalled()
     expect(omniReshimMock).not.toHaveBeenCalled()
     expect(setEnvMock).toHaveBeenCalledTimes(1)
@@ -144,6 +151,8 @@ describe('action', () => {
     restoreCacheMock.mockResolvedValue()
     setupMock.mockResolvedValue()
     omniVersionMock.mockResolvedValue('0.0.23')
+    omniTrustMock.mockResolvedValue(0)
+    setOrgMock.mockResolvedValue()
     omniUpMock.mockResolvedValue(0)
     omniReshimMock.mockResolvedValue(0)
     setEnvMock.mockResolvedValue()
@@ -155,6 +164,8 @@ describe('action', () => {
     expect(restoreCacheMock).toHaveBeenCalledTimes(1)
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).not.toHaveBeenCalled()
+    expect(setOrgMock).toHaveBeenCalledTimes(1)
     expect(omniUpMock).toHaveBeenCalledTimes(1)
     expect(omniReshimMock).not.toHaveBeenCalled()
     expect(setEnvMock).toHaveBeenCalledTimes(1)
@@ -169,6 +180,8 @@ describe('action', () => {
     restoreCacheMock.mockResolvedValue()
     setupMock.mockResolvedValue()
     omniVersionMock.mockResolvedValue('0.0.24')
+    omniTrustMock.mockResolvedValue(0)
+    setOrgMock.mockResolvedValue()
     omniUpMock.mockResolvedValue(0)
     omniReshimMock.mockResolvedValue(0)
     setEnvMock.mockResolvedValue()
@@ -180,6 +193,8 @@ describe('action', () => {
     expect(restoreCacheMock).toHaveBeenCalledTimes(1)
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).toHaveBeenCalledTimes(1)
+    expect(setOrgMock).not.toHaveBeenCalled()
     expect(omniUpMock).not.toHaveBeenCalled()
     expect(omniReshimMock).toHaveBeenCalledTimes(1)
     expect(setEnvMock).toHaveBeenCalledTimes(1)
@@ -194,6 +209,8 @@ describe('action', () => {
     restoreCacheMock.mockResolvedValue()
     setupMock.mockResolvedValue()
     omniVersionMock.mockResolvedValue('1.0.0')
+    omniTrustMock.mockResolvedValue(0)
+    setOrgMock.mockResolvedValue()
     omniUpMock.mockResolvedValue(0)
     omniReshimMock.mockResolvedValue(0)
     setEnvMock.mockResolvedValue()
@@ -205,6 +222,8 @@ describe('action', () => {
     expect(restoreCacheMock).toHaveBeenCalledTimes(1)
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).toHaveBeenCalledTimes(1)
+    expect(setOrgMock).not.toHaveBeenCalled()
     expect(omniUpMock).not.toHaveBeenCalled()
     expect(omniReshimMock).toHaveBeenCalledTimes(1)
     expect(setEnvMock).toHaveBeenCalledTimes(1)
@@ -219,6 +238,8 @@ describe('action', () => {
     restoreCacheMock.mockResolvedValue()
     setupMock.mockResolvedValue()
     omniVersionMock.mockResolvedValue('invalid')
+    omniTrustMock.mockResolvedValue(0)
+    setOrgMock.mockResolvedValue()
     omniUpMock.mockResolvedValue(0)
     omniReshimMock.mockResolvedValue(0)
     setEnvMock.mockResolvedValue()
@@ -230,6 +251,8 @@ describe('action', () => {
     expect(restoreCacheMock).toHaveBeenCalledTimes(1)
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).not.toHaveBeenCalled()
+    expect(setOrgMock).not.toHaveBeenCalled()
     expect(omniUpMock).not.toHaveBeenCalled()
     expect(omniReshimMock).not.toHaveBeenCalled()
     expect(setEnvMock).not.toHaveBeenCalled()
@@ -253,12 +276,7 @@ describe('post-action', () => {
   it('runs the action with default inputs', async () => {
     setInputValues(getInputMock, getBooleanInputMock, {})
 
-    restoreCacheMock.mockResolvedValue()
-    setupMock.mockResolvedValue()
-    omniVersionMock.mockResolvedValue('0.0.23')
-    omniUpMock.mockResolvedValue(0)
-    omniReshimMock.mockResolvedValue(0)
-    setEnvMock.mockResolvedValue()
+    saveCacheMock.mockResolvedValue()
 
     await main.run_post()
     expect(runPostMock).toHaveReturned()

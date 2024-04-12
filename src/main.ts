@@ -3,8 +3,8 @@ import * as semver from 'semver'
 import * as actionsCore from '@actions/core'
 
 import { restoreCache, saveCache } from './cache'
-import { setEnv } from './env'
-import { omniVersion, omniUp, omniReshim } from './omni'
+import { setEnv, setOrg } from './env'
+import { omniVersion, omniUp, omniTrust, omniReshim } from './omni'
 import { setup } from './setup'
 
 export async function run_index(): Promise<void> {
@@ -23,9 +23,15 @@ export async function run_index(): Promise<void> {
       throw new Error(`Invalid version: ${version}`)
     }
 
+    if (semver.satisfies(version, '>=0.0.24')) {
+      await omniTrust()
+    } else {
+      await setOrg()
+    }
+
     const runUp = actionsCore.getBooleanInput('up')
     if (runUp) {
-      await omniUp()
+      await omniUp(version)
     }
 
     if (semver.satisfies(version, '>=0.0.24')) {
