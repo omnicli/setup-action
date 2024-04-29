@@ -91395,6 +91395,9 @@ async function run_index() {
         const trusted = semver.satisfies(version, '>=0.0.24')
             ? (await (0, omni_1.omniTrust)()) === 0
             : await (0, env_1.setOrg)();
+        if (semver.satisfies(version, '<0.0.25')) {
+            await (0, omni_1.disableOmniAutoBootstrapUser)();
+        }
         const runUp = actionsCore.getBooleanInput('up');
         if (runUp) {
             await (0, omni_1.omniUp)(trusted);
@@ -91454,13 +91457,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.omniReshim = exports.omniTrust = exports.omniHookEnv = exports.omniVersion = exports.omniUp = void 0;
+exports.disableOmniAutoBootstrapUser = exports.omniReshim = exports.omniTrust = exports.omniHookEnv = exports.omniVersion = exports.omniUp = void 0;
 const actionsCore = __importStar(__nccwpck_require__(2186));
 const actionsExec = __importStar(__nccwpck_require__(1514));
 // @ts-expect-error There is no declaration file for this package
 const shell_quote_1 = __nccwpck_require__(7029);
+const utils_1 = __nccwpck_require__(1314);
 const omni = async (args) => actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    return actionsExec.exec('omni', args);
+    // Run the command but pipe it so that omni
+    // does not think it is running in a TTY
+    // and does not prompt for input
+    return actionsExec.exec('omni', args, {
+        listeners: {
+            stdout: (data) => {
+                process.stdout.write(data);
+            },
+            stderr: (data) => {
+                process.stderr.write(data);
+            }
+        }
+    });
 });
 const omniOutput = async (args) => actionsCore.group(`Running omni ${args.join(' ')} (grab output)`, async () => {
     let stdout = '';
@@ -91479,6 +91495,32 @@ const omniOutput = async (args) => actionsCore.group(`Running omni ${args.join('
 });
 async function omniUp(trusted) {
     const up_args = (0, shell_quote_1.parse)(actionsCore.getInput('up_args').trim());
+    let has_bootstrap_arg = false;
+    let has_clone_suggested_arg = false;
+    let has_update_user_config_arg = false;
+    for (const arg of up_args) {
+        switch (arg) {
+            case '--bootstrap':
+                has_bootstrap_arg = true;
+                break;
+            case '--clone-suggested':
+                has_clone_suggested_arg = true;
+                break;
+            case '--update-user-config':
+                has_update_user_config_arg = true;
+                break;
+            default:
+                break;
+        }
+    }
+    if (!has_bootstrap_arg) {
+        if (!has_clone_suggested_arg) {
+            up_args.push(...['--clone-suggested', 'no']);
+        }
+        if (!has_update_user_config_arg) {
+            up_args.push(...['--update-user-config', 'no']);
+        }
+    }
     if (!trusted) {
         up_args.push(...['--trust', 'always']);
     }
@@ -91534,6 +91576,10 @@ const omniTrust = async () => omni(['config', 'trust']);
 exports.omniTrust = omniTrust;
 const omniReshim = async () => omni(['config', 'reshim']);
 exports.omniReshim = omniReshim;
+async function disableOmniAutoBootstrapUser() {
+    await (0, utils_1.writeFile)(`${process.env.HOME}/.config/omni/config.yaml`, 'up_command:\n  auto_bootstrap: false\n');
+}
+exports.disableOmniAutoBootstrapUser = disableOmniAutoBootstrapUser;
 
 
 /***/ }),
@@ -91674,8 +91720,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCurrentPlatform = exports.getCurrentArch = exports.parseVersion = void 0;
+exports.writeFile = exports.getCurrentPlatform = exports.getCurrentArch = exports.parseVersion = void 0;
+const fs = __importStar(__nccwpck_require__(7147));
 const os = __importStar(__nccwpck_require__(2037));
+const actionsCore = __importStar(__nccwpck_require__(2186));
 function parseVersion(version) {
     const matchDetails = version.match(/^[v]?(\d+)(?:\.(\d+)(?:\.(\d+))?)?$/);
     if (matchDetails) {
@@ -91720,6 +91768,18 @@ function getCurrentPlatform() {
     }
 }
 exports.getCurrentPlatform = getCurrentPlatform;
+async function writeFile(file, contents) {
+    actionsCore.group(`Writing file: ${file}`, async () => {
+        // Make sure the directory exists
+        const dir = file.toString().split('/').slice(0, -1).join('/');
+        if (dir.length > 0 && !fs.existsSync(dir)) {
+            await fs.promises.mkdir(dir, { recursive: true });
+        }
+        actionsCore.info(`Contents:\n\n${contents}`);
+        await fs.promises.writeFile(file, contents, { encoding: 'utf8' });
+    });
+}
+exports.writeFile = writeFile;
 
 
 /***/ }),

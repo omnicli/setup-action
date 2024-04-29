@@ -1,4 +1,7 @@
+import * as fs from 'fs'
 import * as os from 'os'
+
+import * as actionsCore from '@actions/core'
 
 export function parseVersion(version: string): string {
   const matchDetails = version.match(/^[v]?(\d+)(?:\.(\d+)(?:\.(\d+))?)?$/)
@@ -42,4 +45,20 @@ export function getCurrentPlatform(): string {
     default:
       throw new Error(`Unsupported platform: '${platform}'`)
   }
+}
+
+export async function writeFile(
+  file: fs.PathLike,
+  contents: string
+): Promise<void> {
+  actionsCore.group(`Writing file: ${file}`, async () => {
+    // Make sure the directory exists
+    const dir = file.toString().split('/').slice(0, -1).join('/')
+    if (dir.length > 0 && !fs.existsSync(dir)) {
+      await fs.promises.mkdir(dir, { recursive: true })
+    }
+
+    actionsCore.info(`Contents:\n\n${contents}`)
+    await fs.promises.writeFile(file, contents, { encoding: 'utf8' })
+  })
 }

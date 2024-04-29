@@ -4,7 +4,13 @@ import * as actionsCore from '@actions/core'
 
 import { restoreCache, saveCache } from './cache'
 import { setEnv, setOrg } from './env'
-import { omniVersion, omniUp, omniTrust, omniReshim } from './omni'
+import {
+  omniVersion,
+  omniUp,
+  omniTrust,
+  omniReshim,
+  disableOmniAutoBootstrapUser
+} from './omni'
 import { setup } from './setup'
 
 export async function run_index(): Promise<void> {
@@ -26,6 +32,10 @@ export async function run_index(): Promise<void> {
     const trusted = semver.satisfies(version, '>=0.0.24')
       ? (await omniTrust()) === 0
       : await setOrg()
+
+    if (semver.satisfies(version, '<0.0.25')) {
+      await disableOmniAutoBootstrapUser()
+    }
 
     const runUp = actionsCore.getBooleanInput('up')
     if (runUp) {

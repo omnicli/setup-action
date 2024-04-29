@@ -31,6 +31,10 @@ const omniVersionMock = jest.spyOn(omni, 'omniVersion')
 const omniUpMock = jest.spyOn(omni, 'omniUp')
 const omniTrustMock = jest.spyOn(omni, 'omniTrust')
 const omniReshimMock = jest.spyOn(omni, 'omniReshim')
+const disableOmniAutoBootstrapUserMock = jest.spyOn(
+  omni,
+  'disableOmniAutoBootstrapUser'
+)
 
 // Mock the setup functions
 const setupMock = jest.spyOn(setup, 'setup')
@@ -87,17 +91,26 @@ describe('action', () => {
     setFailedMock = jest.spyOn(actionsCore, 'setFailed').mockImplementation()
   })
 
-  it('runs the action with default inputs', async () => {
-    setInputValues(getInputMock, getBooleanInputMock, {})
+  interface MocksValues {
+    version?: string
+  }
 
+  function setupMocks(values: MocksValues = {}): void {
     restoreCacheMock.mockResolvedValue()
     setupMock.mockResolvedValue()
-    omniVersionMock.mockResolvedValue('0.0.23')
+    omniVersionMock.mockResolvedValue(values.version || '0.0.25')
     omniTrustMock.mockResolvedValue(0)
     setOrgMock.mockResolvedValue(true)
+    disableOmniAutoBootstrapUserMock.mockResolvedValue()
     omniUpMock.mockResolvedValue(0)
     omniReshimMock.mockResolvedValue(0)
     setEnvMock.mockResolvedValue()
+  }
+
+  it('runs the action with default inputs', async () => {
+    setInputValues(getInputMock, getBooleanInputMock, {})
+
+    setupMocks()
 
     await main.run_index()
     expect(runIndexMock).toHaveReturned()
@@ -106,10 +119,11 @@ describe('action', () => {
     expect(restoreCacheMock).toHaveBeenCalledTimes(1)
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
-    expect(omniTrustMock).not.toHaveBeenCalled()
-    expect(setOrgMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).toHaveBeenCalled()
+    expect(setOrgMock).not.toHaveBeenCalledTimes(1)
+    expect(disableOmniAutoBootstrapUserMock).not.toHaveBeenCalled()
     expect(omniUpMock).not.toHaveBeenCalled()
-    expect(omniReshimMock).not.toHaveBeenCalled()
+    expect(omniReshimMock).toHaveBeenCalled()
     expect(setEnvMock).toHaveBeenCalledTimes(1)
 
     // Expect the action to have succeeded
@@ -119,14 +133,7 @@ describe('action', () => {
   it('runs the action with cache disabled', async () => {
     setInputValues(getInputMock, getBooleanInputMock, { cache: false })
 
-    restoreCacheMock.mockResolvedValue()
-    setupMock.mockResolvedValue()
-    omniVersionMock.mockResolvedValue('0.0.23')
-    omniTrustMock.mockResolvedValue(0)
-    setOrgMock.mockResolvedValue(true)
-    omniUpMock.mockResolvedValue(0)
-    omniReshimMock.mockResolvedValue(0)
-    setEnvMock.mockResolvedValue()
+    setupMocks()
 
     await main.run_index()
     expect(runIndexMock).toHaveReturned()
@@ -135,10 +142,11 @@ describe('action', () => {
     expect(restoreCacheMock).not.toHaveBeenCalled()
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
-    expect(omniTrustMock).not.toHaveBeenCalled()
-    expect(setOrgMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).toHaveBeenCalled()
+    expect(setOrgMock).not.toHaveBeenCalledTimes(1)
+    expect(disableOmniAutoBootstrapUserMock).not.toHaveBeenCalled()
     expect(omniUpMock).not.toHaveBeenCalled()
-    expect(omniReshimMock).not.toHaveBeenCalled()
+    expect(omniReshimMock).toHaveBeenCalled()
     expect(setEnvMock).toHaveBeenCalledTimes(1)
 
     // Expect the action to have succeeded
@@ -148,14 +156,7 @@ describe('action', () => {
   it('runs the action with up', async () => {
     setInputValues(getInputMock, getBooleanInputMock, { up: true })
 
-    restoreCacheMock.mockResolvedValue()
-    setupMock.mockResolvedValue()
-    omniVersionMock.mockResolvedValue('0.0.23')
-    omniTrustMock.mockResolvedValue(0)
-    setOrgMock.mockResolvedValue(true)
-    omniUpMock.mockResolvedValue(0)
-    omniReshimMock.mockResolvedValue(0)
-    setEnvMock.mockResolvedValue()
+    setupMocks()
 
     await main.run_index()
     expect(runIndexMock).toHaveReturned()
@@ -164,11 +165,72 @@ describe('action', () => {
     expect(restoreCacheMock).toHaveBeenCalledTimes(1)
     expect(setupMock).toHaveBeenCalledTimes(1)
     expect(omniVersionMock).toHaveBeenCalledTimes(1)
-    expect(omniTrustMock).not.toHaveBeenCalled()
-    expect(setOrgMock).toHaveBeenCalledTimes(1)
+    expect(omniTrustMock).toHaveBeenCalled()
+    expect(setOrgMock).not.toHaveBeenCalledTimes(1)
+    expect(disableOmniAutoBootstrapUserMock).not.toHaveBeenCalled()
     expect(omniUpMock).toHaveBeenCalledTimes(1)
-    expect(omniReshimMock).not.toHaveBeenCalled()
+    expect(omniReshimMock).toHaveBeenCalled()
     expect(setEnvMock).toHaveBeenCalledTimes(1)
+
+    // Expect the action to have succeeded
+    expect(setFailedMock).not.toHaveBeenCalled()
+  })
+
+  it('disable auto-bootstrap using user config if version < 0.0.24', async () => {
+    setInputValues(getInputMock, getBooleanInputMock, {})
+
+    setupMocks({ version: '0.0.23' })
+
+    await main.run_index()
+    expect(runIndexMock).toHaveReturned()
+
+    // Verify that all of the expected functions have been called
+    expect(disableOmniAutoBootstrapUserMock).toHaveBeenCalled()
+
+    // Expect the action to have succeeded
+    expect(setFailedMock).not.toHaveBeenCalled()
+  })
+
+  it('disable auto-bootstrap using user config if version == 0.0.24', async () => {
+    setInputValues(getInputMock, getBooleanInputMock, {})
+
+    setupMocks({ version: '0.0.24' })
+
+    await main.run_index()
+    expect(runIndexMock).toHaveReturned()
+
+    // Verify that all of the expected functions have been called
+    expect(disableOmniAutoBootstrapUserMock).toHaveBeenCalled()
+
+    // Expect the action to have succeeded
+    expect(setFailedMock).not.toHaveBeenCalled()
+  })
+
+  it('do not disable auto-bootstrap if version > 0.0.24', async () => {
+    setInputValues(getInputMock, getBooleanInputMock, {})
+
+    setupMocks({ version: '0.0.25' })
+
+    await main.run_index()
+    expect(runIndexMock).toHaveReturned()
+
+    // Verify that all of the expected functions have been called
+    expect(disableOmniAutoBootstrapUserMock).not.toHaveBeenCalled()
+
+    // Expect the action to have succeeded
+    expect(setFailedMock).not.toHaveBeenCalled()
+  })
+
+  it('runs without reshim if version < 0.0.24', async () => {
+    setInputValues(getInputMock, getBooleanInputMock, {})
+
+    setupMocks({ version: '0.0.23' })
+
+    await main.run_index()
+    expect(runIndexMock).toHaveReturned()
+
+    // Verify that all of the expected functions have been called
+    expect(omniReshimMock).not.toHaveBeenCalledTimes(1)
 
     // Expect the action to have succeeded
     expect(setFailedMock).not.toHaveBeenCalled()
@@ -177,27 +239,13 @@ describe('action', () => {
   it('runs with reshim if version == 0.0.24', async () => {
     setInputValues(getInputMock, getBooleanInputMock, {})
 
-    restoreCacheMock.mockResolvedValue()
-    setupMock.mockResolvedValue()
-    omniVersionMock.mockResolvedValue('0.0.24')
-    omniTrustMock.mockResolvedValue(0)
-    setOrgMock.mockResolvedValue(true)
-    omniUpMock.mockResolvedValue(0)
-    omniReshimMock.mockResolvedValue(0)
-    setEnvMock.mockResolvedValue()
+    setupMocks({ version: '0.0.24' })
 
     await main.run_index()
     expect(runIndexMock).toHaveReturned()
 
     // Verify that all of the expected functions have been called
-    expect(restoreCacheMock).toHaveBeenCalledTimes(1)
-    expect(setupMock).toHaveBeenCalledTimes(1)
-    expect(omniVersionMock).toHaveBeenCalledTimes(1)
-    expect(omniTrustMock).toHaveBeenCalledTimes(1)
-    expect(setOrgMock).not.toHaveBeenCalled()
-    expect(omniUpMock).not.toHaveBeenCalled()
     expect(omniReshimMock).toHaveBeenCalledTimes(1)
-    expect(setEnvMock).toHaveBeenCalledTimes(1)
 
     // Expect the action to have succeeded
     expect(setFailedMock).not.toHaveBeenCalled()
@@ -206,27 +254,13 @@ describe('action', () => {
   it('runs with reshim if version > 0.0.24', async () => {
     setInputValues(getInputMock, getBooleanInputMock, {})
 
-    restoreCacheMock.mockResolvedValue()
-    setupMock.mockResolvedValue()
-    omniVersionMock.mockResolvedValue('1.0.0')
-    omniTrustMock.mockResolvedValue(0)
-    setOrgMock.mockResolvedValue(true)
-    omniUpMock.mockResolvedValue(0)
-    omniReshimMock.mockResolvedValue(0)
-    setEnvMock.mockResolvedValue()
+    setupMocks({ version: '1.0.0' })
 
     await main.run_index()
     expect(runIndexMock).toHaveReturned()
 
     // Verify that all of the expected functions have been called
-    expect(restoreCacheMock).toHaveBeenCalledTimes(1)
-    expect(setupMock).toHaveBeenCalledTimes(1)
-    expect(omniVersionMock).toHaveBeenCalledTimes(1)
-    expect(omniTrustMock).toHaveBeenCalledTimes(1)
-    expect(setOrgMock).not.toHaveBeenCalled()
-    expect(omniUpMock).not.toHaveBeenCalled()
     expect(omniReshimMock).toHaveBeenCalledTimes(1)
-    expect(setEnvMock).toHaveBeenCalledTimes(1)
 
     // Expect the action to have succeeded
     expect(setFailedMock).not.toHaveBeenCalled()
@@ -235,27 +269,10 @@ describe('action', () => {
   it('fails if omniVersion returns an invalid version', async () => {
     setInputValues(getInputMock, getBooleanInputMock, {})
 
-    restoreCacheMock.mockResolvedValue()
-    setupMock.mockResolvedValue()
-    omniVersionMock.mockResolvedValue('invalid')
-    omniTrustMock.mockResolvedValue(0)
-    setOrgMock.mockResolvedValue(true)
-    omniUpMock.mockResolvedValue(0)
-    omniReshimMock.mockResolvedValue(0)
-    setEnvMock.mockResolvedValue()
+    setupMocks({ version: 'invalid' })
 
     await main.run_index()
     expect(runIndexMock).toHaveReturned()
-
-    // Verify that all of the expected functions have been called
-    expect(restoreCacheMock).toHaveBeenCalledTimes(1)
-    expect(setupMock).toHaveBeenCalledTimes(1)
-    expect(omniVersionMock).toHaveBeenCalledTimes(1)
-    expect(omniTrustMock).not.toHaveBeenCalled()
-    expect(setOrgMock).not.toHaveBeenCalled()
-    expect(omniUpMock).not.toHaveBeenCalled()
-    expect(omniReshimMock).not.toHaveBeenCalled()
-    expect(setEnvMock).not.toHaveBeenCalled()
 
     // Verify that the action failed
     expect(setFailedMock).toHaveBeenNthCalledWith(1, 'Invalid version: invalid')

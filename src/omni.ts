@@ -4,6 +4,8 @@ import * as actionsExec from '@actions/exec'
 // @ts-expect-error There is no declaration file for this package
 import { parse } from 'shell-quote'
 
+import { writeFile } from './utils'
+
 interface ExecOutput {
   returnCode: number
   stdout: string
@@ -12,7 +14,19 @@ interface ExecOutput {
 
 const omni = async (args: string[]): Promise<number> =>
   actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    return actionsExec.exec('omni', args)
+    // Run the command but pipe it so that omni
+    // does not think it is running in a TTY
+    // and does not prompt for input
+    return actionsExec.exec('omni', args, {
+      listeners: {
+        stdout: (data: Buffer) => {
+          process.stdout.write(data)
+        },
+        stderr: (data: Buffer) => {
+          process.stderr.write(data)
+        }
+      }
+    })
   })
 
 const omniOutput = async (args: string[]): Promise<ExecOutput> =>
@@ -37,9 +51,39 @@ const omniOutput = async (args: string[]): Promise<ExecOutput> =>
 
 export async function omniUp(trusted: boolean): Promise<number> {
   const up_args = parse(actionsCore.getInput('up_args').trim())
+
+  let has_bootstrap_arg = false
+  let has_clone_suggested_arg = false
+  let has_update_user_config_arg = false
+  for (const arg of up_args) {
+    switch (arg) {
+      case '--bootstrap':
+        has_bootstrap_arg = true
+        break
+      case '--clone-suggested':
+        has_clone_suggested_arg = true
+        break
+      case '--update-user-config':
+        has_update_user_config_arg = true
+        break
+      default:
+        break
+    }
+  }
+
+  if (!has_bootstrap_arg) {
+    if (!has_clone_suggested_arg) {
+      up_args.push(...['--clone-suggested', 'no'])
+    }
+    if (!has_update_user_config_arg) {
+      up_args.push(...['--update-user-config', 'no'])
+    }
+  }
+
   if (!trusted) {
     up_args.push(...['--trust', 'always'])
   }
+
   return omni(['up', ...up_args])
 }
 
@@ -109,3 +153,10 @@ export const omniTrust = async (): Promise<number> => omni(['config', 'trust'])
 
 export const omniReshim = async (): Promise<number> =>
   omni(['config', 'reshim'])
+
+export async function disableOmniAutoBootstrapUser(): Promise<void> {
+  await writeFile(
+    `${process.env.HOME}/.config/omni/config.yaml`,
+    'up_command:\n  auto_bootstrap: false\n'
+  )
+}
