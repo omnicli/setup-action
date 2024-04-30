@@ -23,6 +23,16 @@ export function parseVersion(version: string): string {
   throw new Error(`Invalid version: '${version}'`)
 }
 
+export function printVersion(version: string): string {
+  if (version.startsWith('v')) {
+    version = version.slice(1)
+  }
+  if (version.endsWith('.')) {
+    version = version.slice(0, -1)
+  }
+  return version === '' ? 'latest' : version
+}
+
 export function getCurrentArch(): string {
   const arch = os.arch()
   switch (arch) {

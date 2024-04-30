@@ -2,7 +2,7 @@ up:
   - node: 20.6.0
   - custom:
       name: Install dependencies
-      command: npm install
+      meet: npm install
 
 commands:
   prettier:

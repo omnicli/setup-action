@@ -5,7 +5,12 @@ import * as toolCache from '@actions/tool-cache'
 
 import type { components } from '@octokit/openapi-types'
 
-import { getCurrentArch, getCurrentPlatform, parseVersion } from './utils'
+import {
+  getCurrentArch,
+  getCurrentPlatform,
+  parseVersion,
+  printVersion
+} from './utils'
 
 type GitHubRelease = components['schemas']['release']
 type GitHubReleaseAsset = components['schemas']['release-asset']
@@ -84,6 +89,8 @@ async function getReleaseUrl(
 export async function setup(): Promise<void> {
   // Get version of tool to be installed
   const version = parseVersion(actionsCore.getInput('version'))
+  actionsCore.startGroup(`Setup omni@${printVersion(version)}`)
+
   const platform = getCurrentPlatform()
   const arch = getCurrentArch()
 

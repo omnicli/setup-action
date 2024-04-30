@@ -38,25 +38,28 @@ export async function saveCache(): Promise<void> {
 
   await removeShims()
 
-  const primaryKey = actionsCore.getState('PRIMARY_KEY')
+  const primaryKeyPrefix = actionsCore.getState('PRIMARY_KEY_PREFIX')
   const cachePaths = actionsCore.getState('CACHED_PATHS').split('\n')
   const cacheHashPaths = actionsCore.getState('CACHED_HASHED_PATHS').split('\n')
 
-  const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash')
-  if (cacheCheckHash) {
-    const cacheHash = actionsCore.getState('CACHE_HASH')
-    const currentCacheHash = await hashCache(cacheHashPaths)
-
-    if (cacheHash === currentCacheHash) {
-      actionsCore.info('Cache up-to-date, skipping saving cache')
-      return
-    }
+  const currentCacheHash = await hashCache(cacheHashPaths)
+  const initialCacheHash = actionsCore.getState('CACHE_HASH')
+  if (initialCacheHash && initialCacheHash === currentCacheHash) {
+    actionsCore.info('Cache up-to-date (hash), skipping saving cache')
+    return
   }
 
-  const cacheId = await actionsCache.saveCache(cachePaths, primaryKey)
+  const cacheHitKey = actionsCore.getState('CACHE_KEY')
+  const savePrimaryKey = `${primaryKeyPrefix}${currentCacheHash}`
+  if (cacheHitKey && cacheHitKey === savePrimaryKey) {
+    actionsCore.info('Cache up-to-date (key), skipping saving cache')
+    return
+  }
+
+  const cacheId = await actionsCache.saveCache(cachePaths, savePrimaryKey)
   if (cacheId === -1) return
 
-  actionsCore.info(`Cache saved from ${cachePaths} with key: ${primaryKey}`)
+  actionsCore.info(`Cache saved from ${cachePaths} with key: ${savePrimaryKey}`)
 }
 
 export async function restoreCache(): Promise<void> {
@@ -71,40 +74,42 @@ export async function restoreCache(): Promise<void> {
   const fileHash = await actionsGlob.hashFiles([`.omni.yaml`].join('\n'))
   const prefix = actionsCore.getInput('cache_key_prefix') || 'omni-v0'
   const full_key_prefix = `${prefix}-${getCurrentPlatform()}-${getCurrentArch()}`
-  const primaryKey = `${full_key_prefix}-${fileHash}`
+  const primaryKeyPrefix = `${full_key_prefix}-${fileHash}-`
   const restoreKeys = [`${full_key_prefix}-`]
 
   actionsCore.saveState(
     'CACHE',
     actionsCore.getBooleanInput('cache_write') ?? true
   )
-  actionsCore.saveState('PRIMARY_KEY', primaryKey)
+  actionsCore.saveState('PRIMARY_KEY_PREFIX', primaryKeyPrefix)
   actionsCore.saveState('RESTORE_KEYS', restoreKeys.join('\n'))
   actionsCore.saveState('CACHED_PATHS', cachePaths.join('\n'))
   actionsCore.saveState('CACHED_HASHED_PATHS', cacheHashPaths.join('\n'))
 
   const cacheKey = await actionsCache.restoreCache(
     cachePaths,
-    primaryKey,
+    primaryKeyPrefix,
     restoreKeys
   )
   actionsCore.setOutput('cache-hit', Boolean(cacheKey))
 
   if (!cacheKey) {
-    actionsCore.info(`omni cache not found for ${primaryKey}`)
+    actionsCore.info(
+      `omni cache not found for any of ${primaryKeyPrefix}, ${restoreKeys.join(', ')}`
+    )
     return
   }
 
   await removeShims()
+
+  actionsCore.saveState('CACHE_KEY', cacheKey)
+  actionsCore.info(`omni cache restored from key: ${cacheKey}`)
 
   const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash')
   if (cacheCheckHash) {
     const cacheHash = await hashCache(cacheHashPaths)
     actionsCore.saveState('CACHE_HASH', cacheHash)
   }
-
-  actionsCore.saveState('CACHE_KEY', cacheKey)
-  actionsCore.info(`omni cache restored from key: ${cacheKey}`)
 }
 
 async function removeShims(): Promise<void> {

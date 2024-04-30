@@ -91149,22 +91149,25 @@ async function saveCache() {
         return;
     }
     await removeShims();
-    const primaryKey = actionsCore.getState('PRIMARY_KEY');
+    const primaryKeyPrefix = actionsCore.getState('PRIMARY_KEY_PREFIX');
     const cachePaths = actionsCore.getState('CACHED_PATHS').split('\n');
     const cacheHashPaths = actionsCore.getState('CACHED_HASHED_PATHS').split('\n');
-    const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash');
-    if (cacheCheckHash) {
-        const cacheHash = actionsCore.getState('CACHE_HASH');
-        const currentCacheHash = await hashCache(cacheHashPaths);
-        if (cacheHash === currentCacheHash) {
-            actionsCore.info('Cache up-to-date, skipping saving cache');
-            return;
-        }
+    const currentCacheHash = await hashCache(cacheHashPaths);
+    const initialCacheHash = actionsCore.getState('CACHE_HASH');
+    if (initialCacheHash && initialCacheHash === currentCacheHash) {
+        actionsCore.info('Cache up-to-date (hash), skipping saving cache');
+        return;
     }
-    const cacheId = await actionsCache.saveCache(cachePaths, primaryKey);
+    const cacheHitKey = actionsCore.getState('CACHE_KEY');
+    const savePrimaryKey = `${primaryKeyPrefix}${currentCacheHash}`;
+    if (cacheHitKey && cacheHitKey === savePrimaryKey) {
+        actionsCore.info('Cache up-to-date (key), skipping saving cache');
+        return;
+    }
+    const cacheId = await actionsCache.saveCache(cachePaths, savePrimaryKey);
     if (cacheId === -1)
         return;
-    actionsCore.info(`Cache saved from ${cachePaths} with key: ${primaryKey}`);
+    actionsCore.info(`Cache saved from ${cachePaths} with key: ${savePrimaryKey}`);
 }
 exports.saveCache = saveCache;
 async function restoreCache() {
@@ -91177,27 +91180,27 @@ async function restoreCache() {
     const fileHash = await actionsGlob.hashFiles([`.omni.yaml`].join('\n'));
     const prefix = actionsCore.getInput('cache_key_prefix') || 'omni-v0';
     const full_key_prefix = `${prefix}-${(0, utils_1.getCurrentPlatform)()}-${(0, utils_1.getCurrentArch)()}`;
-    const primaryKey = `${full_key_prefix}-${fileHash}`;
+    const primaryKeyPrefix = `${full_key_prefix}-${fileHash}-`;
     const restoreKeys = [`${full_key_prefix}-`];
     actionsCore.saveState('CACHE', actionsCore.getBooleanInput('cache_write') ?? true);
-    actionsCore.saveState('PRIMARY_KEY', primaryKey);
+    actionsCore.saveState('PRIMARY_KEY_PREFIX', primaryKeyPrefix);
     actionsCore.saveState('RESTORE_KEYS', restoreKeys.join('\n'));
     actionsCore.saveState('CACHED_PATHS', cachePaths.join('\n'));
     actionsCore.saveState('CACHED_HASHED_PATHS', cacheHashPaths.join('\n'));
-    const cacheKey = await actionsCache.restoreCache(cachePaths, primaryKey, restoreKeys);
+    const cacheKey = await actionsCache.restoreCache(cachePaths, primaryKeyPrefix, restoreKeys);
     actionsCore.setOutput('cache-hit', Boolean(cacheKey));
     if (!cacheKey) {
-        actionsCore.info(`omni cache not found for ${primaryKey}`);
+        actionsCore.info(`omni cache not found for any of ${primaryKeyPrefix}, ${restoreKeys.join(', ')}`);
         return;
     }
     await removeShims();
+    actionsCore.saveState('CACHE_KEY', cacheKey);
+    actionsCore.info(`omni cache restored from key: ${cacheKey}`);
     const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash');
     if (cacheCheckHash) {
         const cacheHash = await hashCache(cacheHashPaths);
         actionsCore.saveState('CACHE_HASH', cacheHash);
     }
-    actionsCore.saveState('CACHE_KEY', cacheKey);
-    actionsCore.info(`omni cache restored from key: ${cacheKey}`);
 }
 exports.restoreCache = restoreCache;
 async function removeShims() {
@@ -91672,6 +91675,7 @@ async function getReleaseUrl(version, platform, arch) {
 async function setup() {
     // Get version of tool to be installed
     const version = (0, utils_1.parseVersion)(actionsCore.getInput('version'));
+    actionsCore.startGroup(`Setup omni@${(0, utils_1.printVersion)(version)}`);
     const platform = (0, utils_1.getCurrentPlatform)();
     const arch = (0, utils_1.getCurrentArch)();
     // Download the specific version of the tool
@@ -91721,7 +91725,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.writeFile = exports.getCurrentPlatform = exports.getCurrentArch = exports.parseVersion = void 0;
+exports.writeFile = exports.getCurrentPlatform = exports.getCurrentArch = exports.printVersion = exports.parseVersion = void 0;
 const fs = __importStar(__nccwpck_require__(7147));
 const os = __importStar(__nccwpck_require__(2037));
 const actionsCore = __importStar(__nccwpck_require__(2186));
@@ -91745,6 +91749,16 @@ function parseVersion(version) {
     throw new Error(`Invalid version: '${version}'`);
 }
 exports.parseVersion = parseVersion;
+function printVersion(version) {
+    if (version.startsWith('v')) {
+        version = version.slice(1);
+    }
+    if (version.endsWith('.')) {
+        version = version.slice(0, -1);
+    }
+    return version === '' ? 'latest' : version;
+}
+exports.printVersion = printVersion;
 function getCurrentArch() {
     const arch = os.arch();
     switch (arch) {
