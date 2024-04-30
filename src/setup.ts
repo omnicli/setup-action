@@ -99,4 +99,7 @@ export async function setup(): Promise<void> {
 
   // Expose the tool by adding it to the PATH
   actionsCore.addPath(pathToCLI)
+
+  // Add an environment variable to indicate we're in non-interactive mode
+  actionsCore.exportVariable('OMNI_NONINTERACTIVE', '1')
 }

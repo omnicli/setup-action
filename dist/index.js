@@ -91464,19 +91464,7 @@ const actionsExec = __importStar(__nccwpck_require__(1514));
 const shell_quote_1 = __nccwpck_require__(7029);
 const utils_1 = __nccwpck_require__(1314);
 const omni = async (args) => actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    // Run the command but pipe it so that omni
-    // does not think it is running in a TTY
-    // and does not prompt for input
-    return actionsExec.exec('omni', args, {
-        listeners: {
-            stdout: (data) => {
-                process.stdout.write(data);
-            },
-            stderr: (data) => {
-                process.stderr.write(data);
-            }
-        }
-    });
+    return actionsExec.exec('omni', args);
 });
 const omniOutput = async (args) => actionsCore.group(`Running omni ${args.join(' ')} (grab output)`, async () => {
     let stdout = '';
@@ -91685,6 +91673,8 @@ async function setup() {
     const pathToCLI = await extract(pathToTarball);
     // Expose the tool by adding it to the PATH
     actionsCore.addPath(pathToCLI);
+    // Add an environment variable to indicate we're in non-interactive mode
+    actionsCore.exportVariable('OMNI_NONINTERACTIVE', '1');
 }
 exports.setup = setup;
 

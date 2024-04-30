@@ -14,19 +14,7 @@ interface ExecOutput {
 
 const omni = async (args: string[]): Promise<number> =>
   actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    // Run the command but pipe it so that omni
-    // does not think it is running in a TTY
-    // and does not prompt for input
-    return actionsExec.exec('omni', args, {
-      listeners: {
-        stdout: (data: Buffer) => {
-          process.stdout.write(data)
-        },
-        stderr: (data: Buffer) => {
-          process.stderr.write(data)
-        }
-      }
-    })
+    return actionsExec.exec('omni', args)
   })
 
 const omniOutput = async (args: string[]): Promise<ExecOutput> =>
