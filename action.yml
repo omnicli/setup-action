@@ -54,4 +54,4 @@ runs:
   using: node20
   main: dist/index.js
   post: dist/post/index.js
-  post-if: "success() && inputs.cache == 'true' && inputs.cache_write == 'true'"
+  post-if: 'success()'
