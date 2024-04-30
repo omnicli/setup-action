@@ -1,7 +1,9 @@
+import * as fs from 'fs'
 import * as path from 'path'
 
 import * as actionsCache from '@actions/cache'
 import * as actionsCore from '@actions/core'
+import * as actionsExec from '@actions/exec'
 import * as actionsGlob from '@actions/glob'
 
 import { omniDataHome, omniCacheHome } from './env'
@@ -33,6 +35,8 @@ export async function saveCache(): Promise<void> {
     actionsCore.info('Skipping saving cache')
     return
   }
+
+  await removeShims()
 
   const primaryKey = actionsCore.getState('PRIMARY_KEY')
   const cachePaths = actionsCore.getState('CACHED_PATHS').split('\n')
@@ -91,6 +95,8 @@ export async function restoreCache(): Promise<void> {
     return
   }
 
+  await removeShims()
+
   const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash')
   if (cacheCheckHash) {
     const cacheHash = await hashCache(cacheHashPaths)
@@ -99,4 +105,11 @@ export async function restoreCache(): Promise<void> {
 
   actionsCore.saveState('CACHE_KEY', cacheKey)
   actionsCore.info(`omni cache restored from key: ${cacheKey}`)
+}
+
+async function removeShims(): Promise<void> {
+  const shimsPath = path.join(omniDataHome(), 'shims')
+  if (!fs.existsSync(shimsPath)) return
+  actionsCore.info(`Removing shims directory: ${shimsPath}`)
+  await actionsExec.exec('rm', ['-rf', shimsPath])
 }

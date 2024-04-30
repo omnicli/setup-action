@@ -91114,9 +91114,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.restoreCache = exports.saveCache = exports.hashCache = void 0;
+const fs = __importStar(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
 const actionsCache = __importStar(__nccwpck_require__(7799));
 const actionsCore = __importStar(__nccwpck_require__(2186));
+const actionsExec = __importStar(__nccwpck_require__(1514));
 const actionsGlob = __importStar(__nccwpck_require__(8090));
 const env_1 = __nccwpck_require__(1996);
 const utils_1 = __nccwpck_require__(1314);
@@ -91146,6 +91148,7 @@ async function saveCache() {
         actionsCore.info('Skipping saving cache');
         return;
     }
+    await removeShims();
     const primaryKey = actionsCore.getState('PRIMARY_KEY');
     const cachePaths = actionsCore.getState('CACHED_PATHS').split('\n');
     const cacheHashPaths = actionsCore.getState('CACHED_HASHED_PATHS').split('\n');
@@ -91187,6 +91190,7 @@ async function restoreCache() {
         actionsCore.info(`omni cache not found for ${primaryKey}`);
         return;
     }
+    await removeShims();
     const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash');
     if (cacheCheckHash) {
         const cacheHash = await hashCache(cacheHashPaths);
@@ -91196,6 +91200,13 @@ async function restoreCache() {
     actionsCore.info(`omni cache restored from key: ${cacheKey}`);
 }
 exports.restoreCache = restoreCache;
+async function removeShims() {
+    const shimsPath = path.join((0, env_1.omniDataHome)(), 'shims');
+    if (!fs.existsSync(shimsPath))
+        return;
+    actionsCore.info(`Removing shims directory: ${shimsPath}`);
+    await actionsExec.exec('rm', ['-rf', shimsPath]);
+}
 
 
 /***/ }),
