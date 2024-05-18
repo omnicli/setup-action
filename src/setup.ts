@@ -31,11 +31,15 @@ async function getReleaseUrl(
   if (process.env.GITHUB_TOKEN) {
     headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
   }
+
   const response = await fetch(url, {
     headers
   })
-  const releases = await response.json()
+  if (!response.ok) {
+    throw new Error(`Failed to fetch releases: ${response.statusText}`)
+  }
 
+  const releases = await response.json()
   const release = releases.find(
     (r: GitHubRelease) =>
       // Release version should match the version passed by the user
