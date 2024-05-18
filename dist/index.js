@@ -91676,6 +91676,9 @@ async function getReleaseUrl(version, platform, arch) {
     const response = await fetch(url, {
         headers
     });
+    if (!response.ok) {
+        throw new Error(`Failed to fetch releases: ${response.statusText}`);
+    }
     const releases = await response.json();
     const release = releases.find((r) => 
     // Release version should match the version passed by the user
