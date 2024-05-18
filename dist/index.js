@@ -91113,46 +91113,25 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.restoreCache = exports.saveCache = exports.hashCache = void 0;
-const fs = __importStar(__nccwpck_require__(7147));
+exports.restoreCache = exports.saveCache = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const actionsCache = __importStar(__nccwpck_require__(7799));
 const actionsCore = __importStar(__nccwpck_require__(2186));
-const actionsExec = __importStar(__nccwpck_require__(1514));
 const actionsGlob = __importStar(__nccwpck_require__(8090));
 const env_1 = __nccwpck_require__(1996);
 const utils_1 = __nccwpck_require__(1314);
-async function hashCache(cachePaths) {
-    actionsCore.info(`Hashing cache paths: ${cachePaths}`);
-    const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
-    try {
-        // Override GITHUB_WORKSPACE to be empty so that we can hash anything
-        // without having to worry about the actual workspace; this is required
-        // because the function will ignore anything outside of the github workspace
-        // https://github.com/actions/toolkit/blob/9ddf153e007b587270658b32cc50a457e959c02c/packages/glob/src/internal-hash-files.ts#L24
-        process.env.GITHUB_WORKSPACE = '';
-        const hash = await actionsGlob.hashFiles(cachePaths.join('\n'), '', {
-            followSymbolicLinks: false
-        });
-        actionsCore.info(`Cache hash: ${hash}`);
-        return hash;
-    }
-    finally {
-        // Reset GITHUB_WORKSPACE to its original value
-        process.env.GITHUB_WORKSPACE = GITHUB_WORKSPACE;
-    }
-}
-exports.hashCache = hashCache;
+const cache_utils_1 = __nccwpck_require__(1890);
 async function saveCache() {
-    if (!actionsCore.getState('CACHE')) {
+    const shouldCache = actionsCore.getState('CACHE') === 'true';
+    if (!shouldCache) {
         actionsCore.info('Skipping saving cache');
         return;
     }
-    await removeShims();
+    await (0, cache_utils_1.removeShims)();
     const primaryKeyPrefix = actionsCore.getState('PRIMARY_KEY_PREFIX');
     const cachePaths = actionsCore.getState('CACHED_PATHS').split('\n');
     const cacheHashPaths = actionsCore.getState('CACHED_HASHED_PATHS').split('\n');
-    const currentCacheHash = await hashCache(cacheHashPaths);
+    const currentCacheHash = await (0, cache_utils_1.hashCache)(cacheHashPaths);
     const initialCacheHash = actionsCore.getState('CACHE_HASH');
     if (initialCacheHash && initialCacheHash === currentCacheHash) {
         actionsCore.info('Cache up-to-date (hash), skipping saving cache');
@@ -91193,16 +91172,77 @@ async function restoreCache() {
         actionsCore.info(`omni cache not found for any of ${primaryKeyPrefix}, ${restoreKeys.join(', ')}`);
         return;
     }
-    await removeShims();
+    await (0, cache_utils_1.removeShims)();
     actionsCore.saveState('CACHE_KEY', cacheKey);
     actionsCore.info(`omni cache restored from key: ${cacheKey}`);
     const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash');
     if (cacheCheckHash) {
-        const cacheHash = await hashCache(cacheHashPaths);
+        const cacheHash = await (0, cache_utils_1.hashCache)(cacheHashPaths);
         actionsCore.saveState('CACHE_HASH', cacheHash);
     }
 }
 exports.restoreCache = restoreCache;
+
+
+/***/ }),
+
+/***/ 1890:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.removeShims = exports.hashCache = void 0;
+const fs = __importStar(__nccwpck_require__(7147));
+const path = __importStar(__nccwpck_require__(1017));
+const actionsCore = __importStar(__nccwpck_require__(2186));
+const actionsExec = __importStar(__nccwpck_require__(1514));
+const actionsGlob = __importStar(__nccwpck_require__(8090));
+const env_1 = __nccwpck_require__(1996);
+async function hashCache(cachePaths) {
+    actionsCore.info(`Hashing cache paths: ${cachePaths}`);
+    const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE;
+    try {
+        // Override GITHUB_WORKSPACE to be empty so that we can hash anything
+        // without having to worry about the actual workspace; this is required
+        // because the function will ignore anything outside of the github workspace
+        // https://github.com/actions/toolkit/blob/9ddf153e007b587270658b32cc50a457e959c02c/packages/glob/src/internal-hash-files.ts#L24
+        process.env.GITHUB_WORKSPACE = '';
+        const hash = await actionsGlob.hashFiles(cachePaths.join('\n'), '', {
+            followSymbolicLinks: false
+        });
+        actionsCore.info(`Cache hash: ${hash}`);
+        return hash;
+    }
+    finally {
+        // Reset GITHUB_WORKSPACE to its original value
+        process.env.GITHUB_WORKSPACE = GITHUB_WORKSPACE;
+    }
+}
+exports.hashCache = hashCache;
 async function removeShims() {
     const shimsPath = path.join((0, env_1.omniDataHome)(), 'shims');
     if (!fs.existsSync(shimsPath))
@@ -91210,6 +91250,7 @@ async function removeShims() {
     actionsCore.info(`Removing shims directory: ${shimsPath}`);
     await actionsExec.exec('rm', ['-rf', shimsPath]);
 }
+exports.removeShims = removeShims;
 
 
 /***/ }),
