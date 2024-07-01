@@ -79,6 +79,8 @@ async function getReleaseUrl(
 
   const asset = release.assets.find(
     (a: GitHubReleaseAsset) =>
+      // Asset should be a .tar.gz
+      a.name.endsWith('.tar.gz') &&
       // Asset should be for the platform
       a.name.includes(platform) &&
       // Asset should be for the architecture

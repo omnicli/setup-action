@@ -90359,8 +90359,10 @@ async function getReleaseUrl(version, platform, arch) {
     }
     actionsCore.info(`Found release: ${release.tag_name}`);
     const asset = release.assets.find((a) => 
-    // Asset should be for the platform
-    a.name.includes(platform) &&
+    // Asset should be a .tar.gz
+    a.name.endsWith('.tar.gz') &&
+        // Asset should be for the platform
+        a.name.includes(platform) &&
         // Asset should be for the architecture
         a.name.includes(arch) &&
         // Asset should have a size greater than 1 kilobyte
