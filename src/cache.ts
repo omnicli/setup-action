@@ -56,10 +56,8 @@ export async function restoreCache(): Promise<void> {
   const primaryKeyPrefix = `${full_key_prefix}-${fileHash}-`
   const restoreKeys = [`${full_key_prefix}-`]
 
-  actionsCore.saveState(
-    'CACHE',
-    actionsCore.getBooleanInput('cache_write') ?? true
-  )
+  const cacheWrite = actionsCore.getBooleanInput('cache_write') ?? true
+  actionsCore.saveState('CACHE', cacheWrite)
   actionsCore.saveState('PRIMARY_KEY_PREFIX', primaryKeyPrefix)
   actionsCore.saveState('RESTORE_KEYS', restoreKeys.join('\n'))
   actionsCore.saveState('CACHED_PATHS', cachePaths.join('\n'))
@@ -84,8 +82,8 @@ export async function restoreCache(): Promise<void> {
   actionsCore.saveState('CACHE_KEY', cacheKey)
   actionsCore.info(`omni cache restored from key: ${cacheKey}`)
 
-  const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash')
-  if (cacheCheckHash) {
+  const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash') ?? true
+  if (cacheWrite && cacheCheckHash) {
     const cacheHash = await hashCache(cacheHashPaths)
     actionsCore.saveState('CACHE_HASH', cacheHash)
   }

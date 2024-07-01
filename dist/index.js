@@ -89813,7 +89813,8 @@ async function restoreCache() {
     const full_key_prefix = `${prefix}-${(0, utils_1.getCurrentPlatform)()}-${(0, utils_1.getCurrentArch)()}`;
     const primaryKeyPrefix = `${full_key_prefix}-${fileHash}-`;
     const restoreKeys = [`${full_key_prefix}-`];
-    actionsCore.saveState('CACHE', actionsCore.getBooleanInput('cache_write') ?? true);
+    const cacheWrite = actionsCore.getBooleanInput('cache_write') ?? true;
+    actionsCore.saveState('CACHE', cacheWrite);
     actionsCore.saveState('PRIMARY_KEY_PREFIX', primaryKeyPrefix);
     actionsCore.saveState('RESTORE_KEYS', restoreKeys.join('\n'));
     actionsCore.saveState('CACHED_PATHS', cachePaths.join('\n'));
@@ -89827,8 +89828,8 @@ async function restoreCache() {
     await (0, cache_utils_1.removeShims)();
     actionsCore.saveState('CACHE_KEY', cacheKey);
     actionsCore.info(`omni cache restored from key: ${cacheKey}`);
-    const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash');
-    if (cacheCheckHash) {
+    const cacheCheckHash = actionsCore.getBooleanInput('cache_check_hash') ?? true;
+    if (cacheWrite && cacheCheckHash) {
         const cacheHash = await (0, cache_utils_1.hashCache)(cacheHashPaths);
         actionsCore.saveState('CACHE_HASH', cacheHash);
     }
