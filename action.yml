@@ -43,6 +43,12 @@ inputs:
       invalidated'
     required: false
     default: 'omni-v0'
+  github_token:
+    description:
+      'The GitHub token to use to make API calls; if not specified, the action
+      will use unauthenticated calls, which have a lower rate limit'
+    required: false
+    default: ${{ github.token }}
 
 outputs:
   cache-hit:
