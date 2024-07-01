@@ -7,7 +7,7 @@ author: 'Raphaël Beamonte <raphael.beamonte@gmail.com>'
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
   icon: 'play-circle'
-  color: 'black'
+  color: 'gray-dark'
 
 inputs:
   version:
