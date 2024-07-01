@@ -90323,8 +90323,16 @@ async function getReleaseUrl(version, platform, arch) {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28'
     };
-    if (process.env.GITHUB_TOKEN) {
-        headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+    // Check for a GitHub token, either through a passed environment variable
+    // or through the action input (which defaults to the current context's token)
+    const potentialTokens = [
+        process.env.GITHUB_TOKEN,
+        process.env.GH_TOKEN,
+        actionsCore.getInput('github_token')
+    ];
+    const ghToken = potentialTokens.find(t => t !== undefined && t !== '');
+    if (ghToken) {
+        headers['Authorization'] = `token ${ghToken}`;
     }
     const response = await fetch(url, {
         headers
