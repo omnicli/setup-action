@@ -89765,7 +89765,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.restoreCache = exports.saveCache = void 0;
+exports.saveCache = saveCache;
+exports.restoreCache = restoreCache;
 const path = __importStar(__nccwpck_require__(1017));
 const actionsCache = __importStar(__nccwpck_require__(7799));
 const actionsCore = __importStar(__nccwpck_require__(2186));
@@ -89800,7 +89801,6 @@ async function saveCache() {
         return;
     actionsCore.info(`Cache saved from ${cachePaths} with key: ${savePrimaryKey}`);
 }
-exports.saveCache = saveCache;
 async function restoreCache() {
     actionsCore.startGroup('Restoring cache for omni');
     const cachePaths = [(0, env_1.omniDataHome)(), (0, env_1.omniCacheHome)()];
@@ -89834,7 +89834,6 @@ async function restoreCache() {
         actionsCore.saveState('CACHE_HASH', cacheHash);
     }
 }
-exports.restoreCache = restoreCache;
 
 
 /***/ }),
@@ -89868,7 +89867,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.removeShims = exports.hashCache = void 0;
+exports.hashCache = hashCache;
+exports.removeShims = removeShims;
 const fs = __importStar(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
 const actionsCore = __importStar(__nccwpck_require__(2186));
@@ -89895,7 +89895,6 @@ async function hashCache(cachePaths) {
         process.env.GITHUB_WORKSPACE = GITHUB_WORKSPACE;
     }
 }
-exports.hashCache = hashCache;
 async function removeShims() {
     const shimsPath = path.join((0, env_1.omniDataHome)(), 'shims');
     if (!fs.existsSync(shimsPath))
@@ -89903,7 +89902,6 @@ async function removeShims() {
     actionsCore.info(`Removing shims directory: ${shimsPath}`);
     await actionsExec.exec('rm', ['-rf', shimsPath]);
 }
-exports.removeShims = removeShims;
 
 
 /***/ }),
@@ -89937,7 +89935,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setEnv = exports.setOrg = exports.omniCacheHome = exports.omniDataHome = void 0;
+exports.omniDataHome = omniDataHome;
+exports.omniCacheHome = omniCacheHome;
+exports.setOrg = setOrg;
+exports.setEnv = setEnv;
 const semver = __importStar(__nccwpck_require__(1383));
 const fs = __importStar(__nccwpck_require__(7147));
 const os = __importStar(__nccwpck_require__(2037));
@@ -89959,7 +89960,6 @@ function omniDataHome() {
     actionsCore.saveState('OMNI_DATA_HOME', dataHome);
     return dataHome;
 }
-exports.omniDataHome = omniDataHome;
 function omniCacheHome() {
     let cacheHome = actionsCore.getState('OMNI_CACHE_HOME');
     if (cacheHome)
@@ -89974,7 +89974,6 @@ function omniCacheHome() {
     actionsCore.saveState('OMNI_CACHE_HOME', cacheHome);
     return cacheHome;
 }
-exports.omniCacheHome = omniCacheHome;
 async function setOrg() {
     // Add the current github repository as trusted using the OMNI_ORG
     // environment variable, this will allow the user to use the omni
@@ -90006,7 +90005,6 @@ async function setOrg() {
         return false;
     }
 }
-exports.setOrg = setOrg;
 async function setEnv(version) {
     actionsCore.startGroup('Setting environment to use omni');
     // Make sure that ~/.config/omni/config.yaml exists even
@@ -90045,7 +90043,6 @@ async function setEnv(version) {
         }
     }
 }
-exports.setEnv = setEnv;
 
 
 /***/ }),
@@ -90079,7 +90076,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.run_post = exports.run_index = void 0;
+exports.run_index = run_index;
+exports.run_post = run_post;
 const semver = __importStar(__nccwpck_require__(1383));
 const actionsCore = __importStar(__nccwpck_require__(2186));
 const cache_1 = __nccwpck_require__(4810);
@@ -90119,7 +90117,6 @@ async function run_index() {
         actionsCore.setFailed(e.message);
     }
 }
-exports.run_index = run_index;
 async function run_post() {
     try {
         await (0, cache_1.saveCache)();
@@ -90131,7 +90128,6 @@ async function run_post() {
             throw error;
     }
 }
-exports.run_post = run_post;
 
 
 /***/ }),
@@ -90165,7 +90161,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.disableOmniAutoBootstrapUser = exports.omniReshim = exports.omniTrust = exports.omniHookEnv = exports.omniVersion = exports.omniUp = void 0;
+exports.omniReshim = exports.omniTrust = void 0;
+exports.omniUp = omniUp;
+exports.omniVersion = omniVersion;
+exports.omniHookEnv = omniHookEnv;
+exports.disableOmniAutoBootstrapUser = disableOmniAutoBootstrapUser;
 const actionsCore = __importStar(__nccwpck_require__(2186));
 const actionsExec = __importStar(__nccwpck_require__(1514));
 // @ts-expect-error There is no declaration file for this package
@@ -90222,7 +90222,6 @@ async function omniUp(trusted) {
     }
     return omni(['up', ...up_args]);
 }
-exports.omniUp = omniUp;
 async function omniVersion() {
     const output = await omniOutput(['--version']);
     if (output.returnCode !== 0) {
@@ -90236,7 +90235,6 @@ async function omniVersion() {
     }
     return match[0];
 }
-exports.omniVersion = omniVersion;
 async function omniHookEnv() {
     const output = await omniOutput(['hook', 'env', 'bash']);
     if (output.returnCode !== 0) {
@@ -90267,7 +90265,6 @@ async function omniHookEnv() {
     }
     return env;
 }
-exports.omniHookEnv = omniHookEnv;
 const omniTrust = async () => omni(['config', 'trust']);
 exports.omniTrust = omniTrust;
 const omniReshim = async () => omni(['config', 'reshim']);
@@ -90275,7 +90272,6 @@ exports.omniReshim = omniReshim;
 async function disableOmniAutoBootstrapUser() {
     await (0, utils_1.writeFile)(`${process.env.HOME}/.config/omni/config.yaml`, 'up_command:\n  auto_bootstrap: false\n');
 }
-exports.disableOmniAutoBootstrapUser = disableOmniAutoBootstrapUser;
 
 
 /***/ }),
@@ -90309,7 +90305,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setup = void 0;
+exports.setup = setup;
 const semver = __importStar(__nccwpck_require__(1383));
 const actionsCore = __importStar(__nccwpck_require__(2186));
 const toolCache = __importStar(__nccwpck_require__(7784));
@@ -90396,7 +90392,6 @@ async function setup() {
     // Add an environment variable to indicate we're in non-interactive mode
     actionsCore.exportVariable('OMNI_NONINTERACTIVE', '1');
 }
-exports.setup = setup;
 
 
 /***/ }),
@@ -90430,7 +90425,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.writeFile = exports.getCurrentPlatform = exports.getCurrentArch = exports.printVersion = exports.parseVersion = void 0;
+exports.parseVersion = parseVersion;
+exports.printVersion = printVersion;
+exports.getCurrentArch = getCurrentArch;
+exports.getCurrentPlatform = getCurrentPlatform;
+exports.writeFile = writeFile;
 const fs = __importStar(__nccwpck_require__(7147));
 const os = __importStar(__nccwpck_require__(2037));
 const actionsCore = __importStar(__nccwpck_require__(2186));
@@ -90453,7 +90452,6 @@ function parseVersion(version) {
     }
     throw new Error(`Invalid version: '${version}'`);
 }
-exports.parseVersion = parseVersion;
 function printVersion(version) {
     if (version.startsWith('v')) {
         version = version.slice(1);
@@ -90463,7 +90461,6 @@ function printVersion(version) {
     }
     return version === '' ? 'latest' : version;
 }
-exports.printVersion = printVersion;
 function getCurrentArch() {
     const arch = os.arch();
     switch (arch) {
@@ -90475,7 +90472,6 @@ function getCurrentArch() {
             throw new Error(`Unsupported architecture: '${arch}'`);
     }
 }
-exports.getCurrentArch = getCurrentArch;
 function getCurrentPlatform() {
     const platform = os.platform();
     switch (platform) {
@@ -90487,7 +90483,6 @@ function getCurrentPlatform() {
             throw new Error(`Unsupported platform: '${platform}'`);
     }
 }
-exports.getCurrentPlatform = getCurrentPlatform;
 async function writeFile(file, contents) {
     actionsCore.group(`Writing file: ${file}`, async () => {
         // Make sure the directory exists
@@ -90499,7 +90494,6 @@ async function writeFile(file, contents) {
         await fs.promises.writeFile(file, contents, { encoding: 'utf8' });
     });
 }
-exports.writeFile = writeFile;
 
 
 /***/ }),
