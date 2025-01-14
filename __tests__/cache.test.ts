@@ -141,7 +141,9 @@ describe('cache.ts', () => {
   })
 
   describe('restoreCache', () => {
-    let getBooleanInputMock: jest.SpiedFunction<typeof actionsCore.getBooleanInput>
+    let getBooleanInputMock: jest.SpiedFunction<
+      typeof actionsCore.getBooleanInput
+    >
     let getInputMock: jest.SpiedFunction<typeof actionsCore.getInput>
     let saveStateMock: jest.SpiedFunction<typeof actionsCore.saveState>
     let startGroupMock: jest.SpiedFunction<typeof actionsCore.startGroup>
@@ -151,14 +153,24 @@ describe('cache.ts', () => {
     let omniCacheHomeMock: jest.SpiedFunction<typeof omniCacheHome>
 
     beforeEach(() => {
-      getBooleanInputMock = jest.spyOn(actionsCore, 'getBooleanInput').mockImplementation()
+      getBooleanInputMock = jest
+        .spyOn(actionsCore, 'getBooleanInput')
+        .mockImplementation()
       getInputMock = jest.spyOn(actionsCore, 'getInput').mockImplementation()
       saveStateMock = jest.spyOn(actionsCore, 'saveState').mockImplementation()
-      startGroupMock = jest.spyOn(actionsCore, 'startGroup').mockImplementation()
+      startGroupMock = jest
+        .spyOn(actionsCore, 'startGroup')
+        .mockImplementation()
       setOutputMock = jest.spyOn(actionsCore, 'setOutput').mockImplementation()
-      restoreCacheMock = jest.spyOn(actionsCache, 'restoreCache').mockImplementation()
-      omniDataHomeMock = jest.spyOn({ omniDataHome }, 'omniDataHome').mockReturnValue('/omni/data')
-      omniCacheHomeMock = jest.spyOn({ omniCacheHome }, 'omniCacheHome').mockReturnValue('/omni/cache')
+      restoreCacheMock = jest
+        .spyOn(actionsCache, 'restoreCache')
+        .mockImplementation()
+      omniDataHomeMock = jest
+        .spyOn({ omniDataHome }, 'omniDataHome')
+        .mockReturnValue('/omni/data')
+      omniCacheHomeMock = jest
+        .spyOn({ omniCacheHome }, 'omniCacheHome')
+        .mockReturnValue('/omni/cache')
 
       getBooleanInputMock.mockImplementation(name => {
         switch (name) {

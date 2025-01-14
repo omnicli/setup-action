@@ -70,7 +70,9 @@ describe('cache_utils.ts', () => {
     execMock = jest.spyOn(actionsExec, 'exec').mockImplementation()
     hashFilesMock = jest.spyOn(actionsGlob, 'hashFiles').mockImplementation()
     existsSyncMock = jest.spyOn(fs, 'existsSync').mockImplementation()
-    omniDataHomeMock = jest.spyOn(envModule, 'omniDataHome').mockImplementation()
+    omniDataHomeMock = jest
+      .spyOn(envModule, 'omniDataHome')
+      .mockImplementation()
   })
 
   afterAll(() => {
@@ -92,7 +94,9 @@ describe('cache_utils.ts', () => {
       expect(hashFilesMock).toHaveBeenCalledWith(paths.join('\n'), '', {
         followSymbolicLinks: false
       })
-      expect(infoMock).toHaveBeenCalledWith('Hashing cache paths: /path/1,/path/2')
+      expect(infoMock).toHaveBeenCalledWith(
+        'Hashing cache paths: /path/1,/path/2'
+      )
       expect(infoMock).toHaveBeenCalledWith('Cache hash: hash123')
     })
 
@@ -139,7 +143,9 @@ describe('cache_utils.ts', () => {
 
       const expectedShimsPath = path.join('/omni/data', 'shims')
       expect(execMock).toHaveBeenCalledWith('rm', ['-rf', expectedShimsPath])
-      expect(infoMock).toHaveBeenCalledWith(`Removing shims directory: ${expectedShimsPath}`)
+      expect(infoMock).toHaveBeenCalledWith(
+        `Removing shims directory: ${expectedShimsPath}`
+      )
     })
 
     it('does nothing if shims directory does not exist', async () => {

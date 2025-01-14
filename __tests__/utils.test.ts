@@ -113,7 +113,9 @@ describe('utils.ts', () => {
 
     beforeEach(() => {
       jest.resetAllMocks()
-      groupMock = jest.spyOn(actionsCore, 'group').mockImplementation(async (name, fn) => fn())
+      groupMock = jest
+        .spyOn(actionsCore, 'group')
+        .mockImplementation(async (name, fn) => fn())
     })
 
     it('writes file without creating directory if it exists', async () => {
@@ -139,7 +141,9 @@ describe('utils.ts', () => {
       await utils.writeFile('new/path/file.txt', 'content')
 
       expect(mockedFs.existsSync).toHaveBeenCalledWith('new/path')
-      expect(mockedFs.promises.mkdir).toHaveBeenCalledWith('new/path', { recursive: true })
+      expect(mockedFs.promises.mkdir).toHaveBeenCalledWith('new/path', {
+        recursive: true
+      })
       expect(mockedFs.promises.writeFile).toHaveBeenCalledWith(
         'new/path/file.txt',
         'content',

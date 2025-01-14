@@ -172,6 +172,115 @@ describe('omni.ts', () => {
     })
   })
 
+  describe('omniCheck', () => {
+    beforeEach(() => {
+      execMock.mockResolvedValue(0)
+    })
+
+    it('runs omni config check with no options', async () => {
+      await omni.omniCheck()
+
+      expect(execMock).toHaveBeenCalledWith('omni', ['config', 'check'])
+    })
+
+    it('runs with patterns', async () => {
+      await omni.omniCheck({
+        patterns: ['*.sh', '!test/*']
+      })
+
+      expect(execMock).toHaveBeenCalledWith('omni', [
+        'config',
+        'check',
+        '--pattern',
+        '*.sh',
+        '--pattern',
+        '!test/*'
+      ])
+    })
+
+    it('runs with ignore flags', async () => {
+      await omni.omniCheck({
+        ignore: ['M', 'C001']
+      })
+
+      expect(execMock).toHaveBeenCalledWith('omni', [
+        'config',
+        'check',
+        '--ignore',
+        'M',
+        '--ignore',
+        'C001'
+      ])
+    })
+
+    it('runs with select flags', async () => {
+      await omni.omniCheck({
+        select: ['M0', 'M1']
+      })
+
+      expect(execMock).toHaveBeenCalledWith('omni', [
+        'config',
+        'check',
+        '--select',
+        'M0',
+        '--select',
+        'M1'
+      ])
+    })
+
+    it('runs with additional args', async () => {
+      await omni.omniCheck({
+        args: ['--local', '--output=json']
+      })
+
+      expect(execMock).toHaveBeenCalledWith('omni', [
+        'config',
+        'check',
+        '--local',
+        '--output=json'
+      ])
+    })
+
+    it('runs with all options in correct order', async () => {
+      await omni.omniCheck({
+        args: ['--local'],
+        patterns: ['*.sh'],
+        ignore: ['M'],
+        select: ['C0']
+      })
+
+      expect(execMock).toHaveBeenCalledWith('omni', [
+        'config',
+        'check',
+        '--local',
+        '--pattern',
+        '*.sh',
+        '--ignore',
+        'M',
+        '--select',
+        'C0'
+      ])
+    })
+
+    it('handles command failure', async () => {
+      execMock.mockResolvedValue(1)
+
+      const result = await omni.omniCheck()
+      expect(result).toBe(1)
+    })
+
+    it('handles empty arrays in options', async () => {
+      await omni.omniCheck({
+        patterns: [],
+        ignore: [],
+        select: [],
+        args: []
+      })
+
+      expect(execMock).toHaveBeenCalledWith('omni', ['config', 'check'])
+    })
+  })
+
   describe('omniHookEnv', () => {
     it('parses export operations', async () => {
       execMock.mockImplementation(async (cmd, args, options) => {

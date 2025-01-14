@@ -22,6 +22,26 @@ inputs:
   up_args:
     description: 'Arguments to pass to "omni up"'
     required: false
+  check:
+    description:
+      'Whether or not to run `omni config check` after installing omni'
+    required: false
+    default: false
+  check_patterns:
+    description:
+      'Patterns to pass to `omni config check`. Multiple patterns can be
+      provided as a colon or newline-separated string'
+    required: false
+  check_ignore:
+    description:
+      'Error codes to ignore in `omni config check`. Multiple codes can be
+      provided as a comma or newline-separated string'
+    required: false
+  check_select:
+    description:
+      'Error codes to select in `omni config check`. Multiple codes can be
+      provided as a comma or newline-separated string'
+    required: false
   cache:
     description: 'If set to "false", the cache will not be read nor written'
     required: false

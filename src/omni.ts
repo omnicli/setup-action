@@ -142,6 +142,47 @@ export const omniTrust = async (): Promise<number> => omni(['config', 'trust'])
 export const omniReshim = async (): Promise<number> =>
   omni(['config', 'reshim'])
 
+export interface OmniCheckOptions {
+  patterns?: string[]
+  ignore?: string[]
+  select?: string[]
+  args?: string[]
+}
+
+export const omniCheck = async (
+  options: OmniCheckOptions = {}
+): Promise<number> => {
+  const cmdArgs = ['config', 'check']
+
+  // Add any additional args first
+  if (options.args?.length) {
+    cmdArgs.push(...options.args)
+  }
+
+  // Add patterns
+  if (options.patterns?.length) {
+    options.patterns.forEach(pattern => {
+      cmdArgs.push('--pattern', pattern)
+    })
+  }
+
+  // Add ignore flags
+  if (options.ignore?.length) {
+    options.ignore.forEach(ignore => {
+      cmdArgs.push('--ignore', ignore)
+    })
+  }
+
+  // Add select flags
+  if (options.select?.length) {
+    options.select.forEach(select => {
+      cmdArgs.push('--select', select)
+    })
+  }
+
+  return omni(cmdArgs)
+}
+
 export async function disableOmniAutoBootstrapUser(): Promise<void> {
   await writeFile(
     `${process.env.HOME}/.config/omni/config.yaml`,

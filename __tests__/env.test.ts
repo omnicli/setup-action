@@ -52,7 +52,9 @@ describe('env.ts', () => {
     getStateMock = jest.spyOn(actionsCore, 'getState').mockImplementation()
     saveStateMock = jest.spyOn(actionsCore, 'saveState').mockImplementation()
     homedirMock = jest.spyOn(os, 'homedir').mockReturnValue('/home/user')
-    joinMock = jest.spyOn(path, 'join').mockImplementation((...paths: string[]) => paths.join('/'))
+    joinMock = jest
+      .spyOn(path, 'join')
+      .mockImplementation((...paths: string[]) => paths.join('/'))
   })
 
   afterAll(() => {
@@ -75,7 +77,10 @@ describe('env.ts', () => {
       const result = env.omniDataHome()
 
       expect(result).toBe('/custom/omni/data')
-      expect(saveStateMock).toHaveBeenCalledWith('OMNI_DATA_HOME', '/custom/omni/data')
+      expect(saveStateMock).toHaveBeenCalledWith(
+        'OMNI_DATA_HOME',
+        '/custom/omni/data'
+      )
     })
 
     it('uses XDG_DATA_HOME if set and OMNI_DATA_HOME not set', () => {
@@ -86,7 +91,10 @@ describe('env.ts', () => {
 
       expect(result).toBe('/xdg/data/omni')
       expect(joinMock).toHaveBeenCalledWith('/xdg/data', 'omni')
-      expect(saveStateMock).toHaveBeenCalledWith('OMNI_DATA_HOME', '/xdg/data/omni')
+      expect(saveStateMock).toHaveBeenCalledWith(
+        'OMNI_DATA_HOME',
+        '/xdg/data/omni'
+      )
     })
 
     it('uses default path if no environment variables set', () => {
@@ -119,7 +127,10 @@ describe('env.ts', () => {
       const result = env.omniCacheHome()
 
       expect(result).toBe('/custom/omni/cache')
-      expect(saveStateMock).toHaveBeenCalledWith('OMNI_CACHE_HOME', '/custom/omni/cache')
+      expect(saveStateMock).toHaveBeenCalledWith(
+        'OMNI_CACHE_HOME',
+        '/custom/omni/cache'
+      )
     })
 
     it('uses XDG_CACHE_HOME if set and OMNI_CACHE_HOME not set', () => {
@@ -130,7 +141,10 @@ describe('env.ts', () => {
 
       expect(result).toBe('/xdg/cache/omni')
       expect(joinMock).toHaveBeenCalledWith('/xdg/cache', 'omni')
-      expect(saveStateMock).toHaveBeenCalledWith('OMNI_CACHE_HOME', '/xdg/cache/omni')
+      expect(saveStateMock).toHaveBeenCalledWith(
+        'OMNI_CACHE_HOME',
+        '/xdg/cache/omni'
+      )
     })
 
     it('uses default path if no environment variables set', () => {
@@ -150,12 +164,16 @@ describe('env.ts', () => {
   describe('setOrg', () => {
     let infoMock: jest.SpiedFunction<typeof actionsCore.info>
     let warningMock: jest.SpiedFunction<typeof actionsCore.warning>
-    let exportVariableMock: jest.SpiedFunction<typeof actionsCore.exportVariable>
+    let exportVariableMock: jest.SpiedFunction<
+      typeof actionsCore.exportVariable
+    >
 
     beforeEach(() => {
       infoMock = jest.spyOn(actionsCore, 'info').mockImplementation()
       warningMock = jest.spyOn(actionsCore, 'warning').mockImplementation()
-      exportVariableMock = jest.spyOn(actionsCore, 'exportVariable').mockImplementation()
+      exportVariableMock = jest
+        .spyOn(actionsCore, 'exportVariable')
+        .mockImplementation()
 
       // Mock GitHub context
       const mockContext = {
@@ -195,12 +213,14 @@ describe('env.ts', () => {
 
     it('handles errors and returns false', async () => {
       // Simulate error by removing required properties
-      (actionsGithub as any).context = {}
+      ;(actionsGithub as any).context = {}
 
       const result = await env.setOrg()
 
       expect(result).toBe(false)
-      expect(warningMock).toHaveBeenCalledWith(expect.stringContaining('Failed to get repository information'))
+      expect(warningMock).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to get repository information')
+      )
       expect(warningMock).toHaveBeenCalledWith('Repository will not be trusted')
     })
   })
@@ -208,7 +228,9 @@ describe('env.ts', () => {
   describe('setEnv', () => {
     let infoMock: jest.SpiedFunction<typeof actionsCore.info>
     let addPathMock: jest.SpiedFunction<typeof actionsCore.addPath>
-    let exportVariableMock: jest.SpiedFunction<typeof actionsCore.exportVariable>
+    let exportVariableMock: jest.SpiedFunction<
+      typeof actionsCore.exportVariable
+    >
     let startGroupMock: jest.SpiedFunction<typeof actionsCore.startGroup>
     let mkdirMock: jest.SpiedFunction<typeof fs.promises.mkdir>
     let writeFileMock: jest.SpiedFunction<typeof fs.promises.writeFile>
@@ -217,8 +239,12 @@ describe('env.ts', () => {
     beforeEach(() => {
       infoMock = jest.spyOn(actionsCore, 'info').mockImplementation()
       addPathMock = jest.spyOn(actionsCore, 'addPath').mockImplementation()
-      exportVariableMock = jest.spyOn(actionsCore, 'exportVariable').mockImplementation()
-      startGroupMock = jest.spyOn(actionsCore, 'startGroup').mockImplementation((_name: string) => {})
+      exportVariableMock = jest
+        .spyOn(actionsCore, 'exportVariable')
+        .mockImplementation()
+      startGroupMock = jest
+        .spyOn(actionsCore, 'startGroup')
+        .mockImplementation((_name: string) => {})
       omniHookEnvMock = jest.spyOn(omni, 'omniHookEnv').mockResolvedValue([])
 
       // Setup fs mocks
@@ -250,7 +276,9 @@ describe('env.ts', () => {
     it('adds shims directory to PATH for version >= 0.0.24', async () => {
       await env.setEnv('0.0.24')
 
-      expect(addPathMock).toHaveBeenCalledWith('/home/user/.local/share/omni/shims')
+      expect(addPathMock).toHaveBeenCalledWith(
+        '/home/user/.local/share/omni/shims'
+      )
     })
 
     it('sets environment variables for version < 0.0.24', async () => {
@@ -268,7 +296,9 @@ describe('env.ts', () => {
     it('starts with environment setup group', async () => {
       await env.setEnv('0.0.24')
 
-      expect(startGroupMock).toHaveBeenCalledWith('Setting environment to use omni')
+      expect(startGroupMock).toHaveBeenCalledWith(
+        'Setting environment to use omni'
+      )
     })
   })
 })

@@ -24,7 +24,9 @@ describe('setup.ts', () => {
   let setOutputMock: jest.SpiedFunction<typeof actionsCore.setOutput>
   let downloadToolMock: jest.SpiedFunction<typeof toolCache.downloadTool>
   let extractTarMock: jest.SpiedFunction<typeof toolCache.extractTar>
-  let getCurrentPlatformMock: jest.SpiedFunction<typeof utils.getCurrentPlatform>
+  let getCurrentPlatformMock: jest.SpiedFunction<
+    typeof utils.getCurrentPlatform
+  >
   let getCurrentArchMock: jest.SpiedFunction<typeof utils.getCurrentArch>
   let parseVersionMock: jest.SpiedFunction<typeof utils.parseVersion>
 
@@ -34,17 +36,29 @@ describe('setup.ts', () => {
     // Mock core functions
     getInputMock = jest.spyOn(actionsCore, 'getInput').mockImplementation()
     addPathMock = jest.spyOn(actionsCore, 'addPath').mockImplementation()
-    exportVariableMock = jest.spyOn(actionsCore, 'exportVariable').mockImplementation()
+    exportVariableMock = jest
+      .spyOn(actionsCore, 'exportVariable')
+      .mockImplementation()
     setOutputMock = jest.spyOn(actionsCore, 'setOutput').mockImplementation()
 
     // Mock tool-cache functions
-    downloadToolMock = jest.spyOn(toolCache, 'downloadTool').mockResolvedValue('/path/to/download')
-    extractTarMock = jest.spyOn(toolCache, 'extractTar').mockResolvedValue('/path/to/extract')
+    downloadToolMock = jest
+      .spyOn(toolCache, 'downloadTool')
+      .mockResolvedValue('/path/to/download')
+    extractTarMock = jest
+      .spyOn(toolCache, 'extractTar')
+      .mockResolvedValue('/path/to/extract')
 
     // Mock utils functions
-    getCurrentPlatformMock = jest.spyOn(utils, 'getCurrentPlatform').mockReturnValue('darwin')
-    getCurrentArchMock = jest.spyOn(utils, 'getCurrentArch').mockReturnValue('x86_64')
-    parseVersionMock = jest.spyOn(utils, 'parseVersion').mockReturnValue('v1.2.3')
+    getCurrentPlatformMock = jest
+      .spyOn(utils, 'getCurrentPlatform')
+      .mockReturnValue('darwin')
+    getCurrentArchMock = jest
+      .spyOn(utils, 'getCurrentArch')
+      .mockReturnValue('x86_64')
+    parseVersionMock = jest
+      .spyOn(utils, 'parseVersion')
+      .mockReturnValue('v1.2.3')
 
     // Reset process.env
     process.env = {}
@@ -55,20 +69,21 @@ describe('setup.ts', () => {
       // Mock successful GitHub API response
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            tag_name: 'v1.2.3',
-            draft: false,
-            prerelease: false,
-            assets: [
-              {
-                name: 'omni-darwin-x86_64.tar.gz',
-                browser_download_url: 'https://example.com/download.tar.gz',
-                size: 1024 * 1024  // 1MB
-              }
-            ]
-          }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              tag_name: 'v1.2.3',
+              draft: false,
+              prerelease: false,
+              assets: [
+                {
+                  name: 'omni-darwin-x86_64.tar.gz',
+                  browser_download_url: 'https://example.com/download.tar.gz',
+                  size: 1024 * 1024 // 1MB
+                }
+              ]
+            }
+          ])
       })
 
       // Default input version to latest
@@ -87,18 +102,23 @@ describe('setup.ts', () => {
         'https://api.github.com/repos/XaF/omni/releases',
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': 'token mock-token'
+            Authorization: 'token mock-token'
           })
         })
       )
 
       // Verify download and extraction
-      expect(downloadToolMock).toHaveBeenCalledWith('https://example.com/download.tar.gz')
+      expect(downloadToolMock).toHaveBeenCalledWith(
+        'https://example.com/download.tar.gz'
+      )
       expect(extractTarMock).toHaveBeenCalledWith('/path/to/download')
 
       // Verify environment setup
       expect(addPathMock).toHaveBeenCalledWith('/path/to/extract')
-      expect(exportVariableMock).toHaveBeenCalledWith('OMNI_NONINTERACTIVE', '1')
+      expect(exportVariableMock).toHaveBeenCalledWith(
+        'OMNI_NONINTERACTIVE',
+        '1'
+      )
       expect(setOutputMock).toHaveBeenCalledWith('version', '1.2.3')
     })
 
@@ -128,7 +148,7 @@ describe('setup.ts', () => {
         'https://api.github.com/repos/XaF/omni/releases',
         expect.objectContaining({
           headers: expect.not.objectContaining({
-            'Authorization': expect.any(String)
+            Authorization: expect.any(String)
           })
         })
       )
@@ -148,14 +168,15 @@ describe('setup.ts', () => {
     it('throws error when asset not found', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            tag_name: 'v1.2.3',
-            draft: false,
-            prerelease: false,
-            assets: []
-          }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              tag_name: 'v1.2.3',
+              draft: false,
+              prerelease: false,
+              assets: []
+            }
+          ])
       })
 
       await expect(setup.setup()).rejects.toThrow(
@@ -169,26 +190,29 @@ describe('setup.ts', () => {
         statusText: 'Not Found'
       })
 
-      await expect(setup.setup()).rejects.toThrow('Failed to fetch releases: Not Found')
+      await expect(setup.setup()).rejects.toThrow(
+        'Failed to fetch releases: Not Found'
+      )
     })
 
     it('ignores draft releases', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            tag_name: 'v1.2.3',
-            draft: true,
-            prerelease: false,
-            assets: [
-              {
-                name: 'omni-darwin-x86_64.tar.gz',
-                browser_download_url: 'https://example.com/download.tar.gz',
-                size: 1024 * 1024
-              }
-            ]
-          }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              tag_name: 'v1.2.3',
+              draft: true,
+              prerelease: false,
+              assets: [
+                {
+                  name: 'omni-darwin-x86_64.tar.gz',
+                  browser_download_url: 'https://example.com/download.tar.gz',
+                  size: 1024 * 1024
+                }
+              ]
+            }
+          ])
       })
 
       await expect(setup.setup()).rejects.toThrow(
@@ -199,20 +223,21 @@ describe('setup.ts', () => {
     it('ignores prerelease versions', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            tag_name: 'v1.2.3',
-            draft: false,
-            prerelease: true,
-            assets: [
-              {
-                name: 'omni-darwin-x86_64.tar.gz',
-                browser_download_url: 'https://example.com/download.tar.gz',
-                size: 1024 * 1024
-              }
-            ]
-          }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              tag_name: 'v1.2.3',
+              draft: false,
+              prerelease: true,
+              assets: [
+                {
+                  name: 'omni-darwin-x86_64.tar.gz',
+                  browser_download_url: 'https://example.com/download.tar.gz',
+                  size: 1024 * 1024
+                }
+              ]
+            }
+          ])
       })
 
       await expect(setup.setup()).rejects.toThrow(
@@ -223,20 +248,21 @@ describe('setup.ts', () => {
     it('ignores assets with invalid size', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([
-          {
-            tag_name: 'v1.2.3',
-            draft: false,
-            prerelease: false,
-            assets: [
-              {
-                name: 'omni-darwin-x86_64.tar.gz',
-                browser_download_url: 'https://example.com/download.tar.gz',
-                size: 512  // Less than 1KB
-              }
-            ]
-          }
-        ])
+        json: () =>
+          Promise.resolve([
+            {
+              tag_name: 'v1.2.3',
+              draft: false,
+              prerelease: false,
+              assets: [
+                {
+                  name: 'omni-darwin-x86_64.tar.gz',
+                  browser_download_url: 'https://example.com/download.tar.gz',
+                  size: 512 // Less than 1KB
+                }
+              ]
+            }
+          ])
       })
 
       await expect(setup.setup()).rejects.toThrow(
@@ -258,7 +284,7 @@ describe('setup.ts', () => {
         'https://api.github.com/repos/XaF/omni/releases',
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': 'token env-token'
+            Authorization: 'token env-token'
           })
         })
       )
@@ -268,26 +294,29 @@ describe('setup.ts', () => {
       let extractZipMock: jest.SpiedFunction<typeof toolCache.extractZip>
 
       beforeEach(() => {
-        extractZipMock = jest.spyOn(toolCache, 'extractZip').mockResolvedValue('/path/to/extract')
+        extractZipMock = jest
+          .spyOn(toolCache, 'extractZip')
+          .mockResolvedValue('/path/to/extract')
       })
 
       it('uses extractZip for .zip files', async () => {
         mockFetch.mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve([
-            {
-              tag_name: 'v1.2.3',
-              draft: false,
-              prerelease: false,
-              assets: [
-                {
-                  name: 'omni-v1.2.3-darwin-x86_64.zip',
-                  browser_download_url: 'https://example.com/download.zip',
-                  size: 1024 * 1024
-                }
-              ]
-            }
-          ])
+          json: () =>
+            Promise.resolve([
+              {
+                tag_name: 'v1.2.3',
+                draft: false,
+                prerelease: false,
+                assets: [
+                  {
+                    name: 'omni-v1.2.3-darwin-x86_64.zip',
+                    browser_download_url: 'https://example.com/download.zip',
+                    size: 1024 * 1024
+                  }
+                ]
+              }
+            ])
         })
 
         await setup.setup()
@@ -299,20 +328,21 @@ describe('setup.ts', () => {
       it('uses extractTar for .tar.gz files', async () => {
         mockFetch.mockResolvedValue({
           ok: true,
-          json: () => Promise.resolve([
-            {
-              tag_name: 'v1.2.3',
-              draft: false,
-              prerelease: false,
-              assets: [
-                {
-                  name: 'omni-v1.2.3-darwin-x86_64.tar.gz',
-                  browser_download_url: 'https://example.com/download.tar.gz',
-                  size: 1024 * 1024
-                }
-              ]
-            }
-          ])
+          json: () =>
+            Promise.resolve([
+              {
+                tag_name: 'v1.2.3',
+                draft: false,
+                prerelease: false,
+                assets: [
+                  {
+                    name: 'omni-v1.2.3-darwin-x86_64.tar.gz',
+                    browser_download_url: 'https://example.com/download.tar.gz',
+                    size: 1024 * 1024
+                  }
+                ]
+              }
+            ])
         })
 
         await setup.setup()
@@ -323,39 +353,44 @@ describe('setup.ts', () => {
 
       it('uses correct extractor based on download URL', async () => {
         // Test both types in sequence to ensure the selection logic works properly
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve([
-            {
-              tag_name: 'v1.2.3',
-              draft: false,
-              prerelease: false,
-              assets: [
+        mockFetch
+          .mockResolvedValueOnce({
+            ok: true,
+            json: () =>
+              Promise.resolve([
                 {
-                  name: 'omni-v1.2.3-darwin-x86_64.zip',
-                  browser_download_url: 'https://example.com/archive.zip',
-                  size: 1024 * 1024
+                  tag_name: 'v1.2.3',
+                  draft: false,
+                  prerelease: false,
+                  assets: [
+                    {
+                      name: 'omni-v1.2.3-darwin-x86_64.zip',
+                      browser_download_url: 'https://example.com/archive.zip',
+                      size: 1024 * 1024
+                    }
+                  ]
                 }
-              ]
-            }
-          ])
-        }).mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve([
-            {
-              tag_name: 'v1.2.3',
-              draft: false,
-              prerelease: false,
-              assets: [
+              ])
+          })
+          .mockResolvedValueOnce({
+            ok: true,
+            json: () =>
+              Promise.resolve([
                 {
-                  name: 'omni-v1.2.3-darwin-x86_64.tar.gz',
-                  browser_download_url: 'https://example.com/archive.tar.gz',
-                  size: 1024 * 1024
+                  tag_name: 'v1.2.3',
+                  draft: false,
+                  prerelease: false,
+                  assets: [
+                    {
+                      name: 'omni-v1.2.3-darwin-x86_64.tar.gz',
+                      browser_download_url:
+                        'https://example.com/archive.tar.gz',
+                      size: 1024 * 1024
+                    }
+                  ]
                 }
-              ]
-            }
-          ])
-        })
+              ])
+          })
 
         // Test zip extraction
         await setup.setup()
