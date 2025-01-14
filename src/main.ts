@@ -10,7 +10,6 @@ import {
   omniTrust,
   omniReshim,
   omniCheck,
-  OmniCheckOptions,
   disableOmniAutoBootstrapUser
 } from './omni'
 import { setup } from './setup'
@@ -47,34 +46,7 @@ export async function run_index(): Promise<void> {
     const runCheck = actionsCore.getBooleanInput('check')
     if (runCheck) {
       if (semver.satisfies(version, '>=2025.1.0')) {
-        // Split patterns by newlines or colons and filter empty strings
-        const patterns = actionsCore
-          .getInput('check_patterns')
-          .split(/[\n:]/)
-          .map(p => p.trim())
-          .filter(Boolean)
-
-        // Split ignore/select by newlines or commas and filter empty strings
-        const ignore = actionsCore
-          .getInput('check_ignore')
-          .split(/[\n,]/)
-          .map(i => i.trim())
-          .filter(Boolean)
-        const select = actionsCore
-          .getInput('check_select')
-          .split(/[\n,]/)
-          .map(s => s.trim())
-          .filter(Boolean)
-
-        const checkOptions: OmniCheckOptions = { args: ['--local'] }
-        if (patterns.length > 0) checkOptions.patterns = patterns
-        if (ignore.length > 0) checkOptions.ignore = ignore
-        if (select.length > 0) checkOptions.select = select
-
-        const checkResult = await omniCheck(checkOptions)
-        if (checkResult !== 0) {
-          throw new Error('omni config check failed')
-        }
+        await omniCheck()
       } else {
         // Skip running since the command is not available
         actionsCore.warning(

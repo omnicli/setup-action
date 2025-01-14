@@ -180,74 +180,22 @@ describe('omni.ts', () => {
     it('runs omni config check with no options', async () => {
       await omni.omniCheck()
 
-      expect(execMock).toHaveBeenCalledWith('omni', ['config', 'check'])
+      expect(execMock).toHaveBeenCalledWith('omni', [
+        'config',
+        'check',
+        '--local'
+      ])
     })
 
     it('runs with patterns', async () => {
-      await omni.omniCheck({
-        patterns: ['*.sh', '!test/*']
+      getInputMock.mockImplementation(name => {
+        if (name === 'check_patterns') return '*.sh:!test/*\ntest.sh'
+        else if (name === 'check_ignore') return ''
+        else if (name === 'check_select') return ''
+        throw new Error(`Unexpected input: ${name}`)
       })
 
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'config',
-        'check',
-        '--pattern',
-        '*.sh',
-        '--pattern',
-        '!test/*'
-      ])
-    })
-
-    it('runs with ignore flags', async () => {
-      await omni.omniCheck({
-        ignore: ['M', 'C001']
-      })
-
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'config',
-        'check',
-        '--ignore',
-        'M',
-        '--ignore',
-        'C001'
-      ])
-    })
-
-    it('runs with select flags', async () => {
-      await omni.omniCheck({
-        select: ['M0', 'M1']
-      })
-
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'config',
-        'check',
-        '--select',
-        'M0',
-        '--select',
-        'M1'
-      ])
-    })
-
-    it('runs with additional args', async () => {
-      await omni.omniCheck({
-        args: ['--local', '--output=json']
-      })
-
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'config',
-        'check',
-        '--local',
-        '--output=json'
-      ])
-    })
-
-    it('runs with all options in correct order', async () => {
-      await omni.omniCheck({
-        args: ['--local'],
-        patterns: ['*.sh'],
-        ignore: ['M'],
-        select: ['C0']
-      })
+      await omni.omniCheck()
 
       expect(execMock).toHaveBeenCalledWith('omni', [
         'config',
@@ -255,10 +203,56 @@ describe('omni.ts', () => {
         '--local',
         '--pattern',
         '*.sh',
+        '--pattern',
+        '!test/*',
+        '--pattern',
+        'test.sh'
+      ])
+    })
+
+    it('runs with ignore', async () => {
+      getInputMock.mockImplementation(name => {
+        if (name === 'check_patterns') return ''
+        else if (name === 'check_ignore') return 'M,C00\nC102'
+        else if (name === 'check_select') return ''
+        throw new Error(`Unexpected input: ${name}`)
+      })
+
+      await omni.omniCheck()
+
+      expect(execMock).toHaveBeenCalledWith('omni', [
+        'config',
+        'check',
+        '--local',
         '--ignore',
         'M',
+        '--ignore',
+        'C00',
+        '--ignore',
+        'C102'
+      ])
+    })
+
+    it('runs with ignore', async () => {
+      getInputMock.mockImplementation(name => {
+        if (name === 'check_patterns') return ''
+        else if (name === 'check_ignore') return ''
+        else if (name === 'check_select') return 'M,C00\nC102'
+        throw new Error(`Unexpected input: ${name}`)
+      })
+
+      await omni.omniCheck()
+
+      expect(execMock).toHaveBeenCalledWith('omni', [
+        'config',
+        'check',
+        '--local',
         '--select',
-        'C0'
+        'M',
+        '--select',
+        'C00',
+        '--select',
+        'C102'
       ])
     })
 
@@ -267,17 +261,6 @@ describe('omni.ts', () => {
 
       const result = await omni.omniCheck()
       expect(result).toBe(1)
-    })
-
-    it('handles empty arrays in options', async () => {
-      await omni.omniCheck({
-        patterns: [],
-        ignore: [],
-        select: [],
-        args: []
-      })
-
-      expect(execMock).toHaveBeenCalledWith('omni', ['config', 'check'])
     })
   })
 

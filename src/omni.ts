@@ -142,43 +142,34 @@ export const omniTrust = async (): Promise<number> => omni(['config', 'trust'])
 export const omniReshim = async (): Promise<number> =>
   omni(['config', 'reshim'])
 
-export interface OmniCheckOptions {
-  patterns?: string[]
-  ignore?: string[]
-  select?: string[]
-  args?: string[]
-}
+export const omniCheck = async (): Promise<number> => {
+  const cmdArgs = ['config', 'check', '--local']
 
-export const omniCheck = async (
-  options: OmniCheckOptions = {}
-): Promise<number> => {
-  const cmdArgs = ['config', 'check']
+  // Split patterns by newlines or colons and filter empty strings
+  const patterns = (actionsCore.getInput('check_patterns') || '')
+    .split(/[\n:]/)
+    .map((p: string) => p.trim())
+    .filter(Boolean)
+  patterns.forEach(pattern => {
+    cmdArgs.push('--pattern', pattern)
+  })
 
-  // Add any additional args first
-  if (options.args?.length) {
-    cmdArgs.push(...options.args)
-  }
+  // Split ignore/select by newlines or commas and filter empty strings
+  const ignore = (actionsCore.getInput('check_ignore') || '')
+    .split(/[\n,]/)
+    .map((i: string) => i.trim())
+    .filter(Boolean)
+  ignore.forEach(ignore => {
+    cmdArgs.push('--ignore', ignore)
+  })
 
-  // Add patterns
-  if (options.patterns?.length) {
-    options.patterns.forEach(pattern => {
-      cmdArgs.push('--pattern', pattern)
-    })
-  }
-
-  // Add ignore flags
-  if (options.ignore?.length) {
-    options.ignore.forEach(ignore => {
-      cmdArgs.push('--ignore', ignore)
-    })
-  }
-
-  // Add select flags
-  if (options.select?.length) {
-    options.select.forEach(select => {
-      cmdArgs.push('--select', select)
-    })
-  }
+  const select = (actionsCore.getInput('check_select') || '')
+    .split(/[\n,]/)
+    .map((s: string) => s.trim())
+    .filter(Boolean)
+  select.forEach(select => {
+    cmdArgs.push('--select', select)
+  })
 
   return omni(cmdArgs)
 }
