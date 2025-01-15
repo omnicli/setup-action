@@ -62,11 +62,6 @@ export async function run_index(): Promise<void> {
     await setEnv(version)
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e)
-    try {
-      actionsCore.setOutput('error', errorMessage)
-    } catch {
-      // Ignore any errors from setOutput
-    }
     actionsCore.setFailed(errorMessage)
   }
 }
@@ -75,13 +70,7 @@ export async function run_post(): Promise<void> {
   try {
     await saveCache()
   } catch (error) {
-    if (error instanceof Error) {
-      try {
-        actionsCore.setOutput('error', error.message)
-      } catch {
-        // Ignore any errors from setOutput
-      }
-      actionsCore.setFailed(error.message)
-    } else throw error
+    if (error instanceof Error) actionsCore.setFailed(error.message)
+    else throw error
   }
 }

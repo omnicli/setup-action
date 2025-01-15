@@ -75,8 +75,6 @@ outputs:
     description: 'Whether the cache was hit or not'
   version:
     description: 'The version of omni that was installed'
-  error:
-    description: 'The error message if an error occurred'
 
 runs:
   using: node20

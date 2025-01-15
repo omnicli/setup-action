@@ -98,15 +98,9 @@ jobs:
       - name: Check if action errored
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
-          ACTION_ERROR: ${{ steps.test-action.outputs.error }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
-            exit 1
-          fi
-
-          if [[ "$ACTION_ERROR" != "omni up "*" failed with exit code 1" ]]; then
-            echo "Action did not error with the expected error message"
             exit 1
           fi
 
@@ -139,14 +133,8 @@ jobs:
       - name: Check if action errored
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
-          ACTION_ERROR: ${{ steps.test-action.outputs.error }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
-            exit 1
-          fi
-
-          if [[ "$ACTION_ERROR" != "omni config check "*" failed with exit code 1" ]]; then
-            echo "Action did not error with the expected error message"
             exit 1
           fi

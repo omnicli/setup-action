@@ -90125,12 +90125,6 @@ async function run_index() {
     }
     catch (e) {
         const errorMessage = e instanceof Error ? e.message : String(e);
-        try {
-            actionsCore.setOutput('error', errorMessage);
-        }
-        catch {
-            // Ignore any errors from setOutput
-        }
         actionsCore.setFailed(errorMessage);
     }
 }
@@ -90139,15 +90133,8 @@ async function run_post() {
         await (0, cache_1.saveCache)();
     }
     catch (error) {
-        if (error instanceof Error) {
-            try {
-                actionsCore.setOutput('error', error.message);
-            }
-            catch {
-                // Ignore any errors from setOutput
-            }
+        if (error instanceof Error)
             actionsCore.setFailed(error.message);
-        }
         else
             throw error;
     }
@@ -90196,12 +90183,7 @@ const actionsExec = __importStar(__nccwpck_require__(1514));
 const shell_quote_1 = __nccwpck_require__(7029);
 const utils_1 = __nccwpck_require__(1314);
 const omni = async (args) => actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    // Run the command and throw an error if it fails
-    let exit_code = await actionsExec.exec('omni', args);
-    if (exit_code !== 0) {
-        throw new Error(`omni ${args.join(' ')} failed with exit code ${exit_code}`);
-    }
-    return exit_code;
+    return actionsExec.exec('omni', args);
 });
 const omniOutput = async (args) => actionsCore.group(`Running omni ${args.join(' ')} (grab output)`, async () => {
     let stdout = '';

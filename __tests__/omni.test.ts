@@ -175,10 +175,10 @@ describe('omni.ts', () => {
     })
 
     it('handles command failure', async () => {
-      execMock.mockResolvedValue(1)
-      expect(omni.omniUp(true)).rejects.toThrow(
-        'omni up --foo --bar --clone-suggested no --update-user-config no failed with exit code 1'
-      )
+      execMock.mockImplementation(async (cmd, args, options) => {
+        throw new Error('failed')
+      })
+      expect(omni.omniUp(true)).rejects.toThrow('failed')
     })
   })
 
@@ -267,10 +267,10 @@ describe('omni.ts', () => {
     })
 
     it('handles command failure', async () => {
-      execMock.mockResolvedValue(1)
-      expect(omni.omniCheck()).rejects.toThrow(
-        'omni config check --local failed with exit code 1'
-      )
+      execMock.mockImplementation(async (cmd, args, options) => {
+        throw new Error('failed')
+      })
+      expect(omni.omniCheck()).rejects.toThrow('failed')
     })
   })
 
