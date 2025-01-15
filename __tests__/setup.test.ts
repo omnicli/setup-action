@@ -15,7 +15,7 @@ jest.mock('../src/utils')
 
 // Mock fetch globally
 const mockFetch = jest.fn()
-global.fetch = mockFetch as jest.Mock
+global.fetch = mockFetch
 
 describe('setup.ts', () => {
   let getInputMock: jest.SpiedFunction<typeof actionsCore.getInput>
@@ -24,9 +24,11 @@ describe('setup.ts', () => {
   let setOutputMock: jest.SpiedFunction<typeof actionsCore.setOutput>
   let downloadToolMock: jest.SpiedFunction<typeof toolCache.downloadTool>
   let extractTarMock: jest.SpiedFunction<typeof toolCache.extractTar>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let getCurrentPlatformMock: jest.SpiedFunction<
     typeof utils.getCurrentPlatform
   >
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let getCurrentArchMock: jest.SpiedFunction<typeof utils.getCurrentArch>
   let parseVersionMock: jest.SpiedFunction<typeof utils.parseVersion>
 
@@ -69,7 +71,7 @@ describe('setup.ts', () => {
       // Mock successful GitHub API response
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () =>
+        json: async () =>
           Promise.resolve([
             {
               tag_name: 'v1.2.3',
@@ -157,7 +159,7 @@ describe('setup.ts', () => {
     it('throws error when release not found', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([])
+        json: async () => Promise.resolve([])
       })
 
       await expect(setup.setup()).rejects.toThrow(
@@ -168,7 +170,7 @@ describe('setup.ts', () => {
     it('throws error when asset not found', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () =>
+        json: async () =>
           Promise.resolve([
             {
               tag_name: 'v1.2.3',
@@ -198,7 +200,7 @@ describe('setup.ts', () => {
     it('ignores draft releases', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () =>
+        json: async () =>
           Promise.resolve([
             {
               tag_name: 'v1.2.3',
@@ -223,7 +225,7 @@ describe('setup.ts', () => {
     it('ignores prerelease versions', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () =>
+        json: async () =>
           Promise.resolve([
             {
               tag_name: 'v1.2.3',
@@ -248,7 +250,7 @@ describe('setup.ts', () => {
     it('ignores assets with invalid size', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () =>
+        json: async () =>
           Promise.resolve([
             {
               tag_name: 'v1.2.3',
@@ -302,7 +304,7 @@ describe('setup.ts', () => {
       it('uses extractZip for .zip files', async () => {
         mockFetch.mockResolvedValue({
           ok: true,
-          json: () =>
+          json: async () =>
             Promise.resolve([
               {
                 tag_name: 'v1.2.3',
@@ -328,7 +330,7 @@ describe('setup.ts', () => {
       it('uses extractTar for .tar.gz files', async () => {
         mockFetch.mockResolvedValue({
           ok: true,
-          json: () =>
+          json: async () =>
             Promise.resolve([
               {
                 tag_name: 'v1.2.3',
@@ -356,7 +358,7 @@ describe('setup.ts', () => {
         mockFetch
           .mockResolvedValueOnce({
             ok: true,
-            json: () =>
+            json: async () =>
               Promise.resolve([
                 {
                   tag_name: 'v1.2.3',
@@ -374,7 +376,7 @@ describe('setup.ts', () => {
           })
           .mockResolvedValueOnce({
             ok: true,
-            json: () =>
+            json: async () =>
               Promise.resolve([
                 {
                   tag_name: 'v1.2.3',

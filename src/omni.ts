@@ -150,26 +150,26 @@ export const omniCheck = async (): Promise<number> => {
     .split(/[\n:]/)
     .map((p: string) => p.trim())
     .filter(Boolean)
-  patterns.forEach(pattern => {
+  for (const pattern of patterns) {
     cmdArgs.push('--pattern', pattern)
-  })
+  }
 
   // Split ignore/select by newlines or commas and filter empty strings
   const ignore = (actionsCore.getInput('check_ignore') || '')
     .split(/[\n,]/)
     .map((i: string) => i.trim())
     .filter(Boolean)
-  ignore.forEach(ignore => {
-    cmdArgs.push('--ignore', ignore)
-  })
+  for (const ign of ignore) {
+    cmdArgs.push('--ignore', ign)
+  }
 
   const select = (actionsCore.getInput('check_select') || '')
     .split(/[\n,]/)
     .map((s: string) => s.trim())
     .filter(Boolean)
-  select.forEach(select => {
-    cmdArgs.push('--select', select)
-  })
+  for (const sel of select) {
+    cmdArgs.push('--select', sel)
+  }
 
   return omni(cmdArgs)
 }

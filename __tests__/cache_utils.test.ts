@@ -1,3 +1,5 @@
+/* eslint-disable import/first, filenames/match-regex */
+
 // Mock fs before any imports
 const fsPromises = {
   writeFile: jest.fn(),

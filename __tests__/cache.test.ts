@@ -4,7 +4,6 @@
 
 import * as actionsCore from '@actions/core'
 import * as actionsCache from '@actions/cache'
-import * as actionsGlob from '@actions/glob'
 
 import * as cache from '../src/cache'
 import * as cacheUtils from '../src/cache_utils'
@@ -192,6 +191,9 @@ describe('cache.ts', () => {
       await cache.restoreCache()
 
       expect(startGroupMock).toHaveBeenCalledWith('Restoring cache for omni')
+
+      expect(omniCacheHomeMock).toHaveBeenCalled()
+      expect(omniDataHomeMock).toHaveBeenCalled()
     })
 
     it('sets up correct cache paths', async () => {

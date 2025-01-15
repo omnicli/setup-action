@@ -1,6 +1,7 @@
 /**
  * Unit tests for env functionality, src/env.ts
  */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 
 import * as fs from 'fs'
 import * as os from 'os'
@@ -69,6 +70,7 @@ describe('env.ts', () => {
 
       expect(result).toBe('/cached/path')
       expect(saveStateMock).not.toHaveBeenCalled()
+      expect(homedirMock).not.toHaveBeenCalled()
     })
 
     it('uses OMNI_DATA_HOME if set', () => {
@@ -213,6 +215,7 @@ describe('env.ts', () => {
 
     it('handles errors and returns false', async () => {
       // Simulate error by removing required properties
+      // eslint-disable-next-line no-extra-semi
       ;(actionsGithub as any).context = {}
 
       const result = await env.setOrg()
@@ -266,6 +269,8 @@ describe('env.ts', () => {
     })
 
     it('creates config file if it does not exist', async () => {
+      expect(infoMock).not.toHaveBeenCalled()
+
       const configPath = '/home/user/.config/omni/config.yaml'
 
       await env.setEnv('0.0.24')

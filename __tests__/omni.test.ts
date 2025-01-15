@@ -4,6 +4,8 @@
 
 import * as actionsCore from '@actions/core'
 import * as actionsExec from '@actions/exec'
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as fs from 'fs'
 
 import * as omni from '../src/omni'
@@ -11,6 +13,7 @@ import * as utils from '../src/utils'
 
 // Mock the GitHub Actions core library
 let getInputMock: jest.SpiedFunction<typeof actionsCore.getInput>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let setFailedMock: jest.SpiedFunction<typeof actionsCore.setFailed>
 
 // Mock the GitHub Actions exec library
@@ -233,7 +236,7 @@ describe('omni.ts', () => {
       ])
     })
 
-    it('runs with ignore', async () => {
+    it('runs with select', async () => {
       getInputMock.mockImplementation(name => {
         if (name === 'check_patterns') return ''
         else if (name === 'check_ignore') return ''
@@ -325,8 +328,9 @@ describe('omni.ts', () => {
     })
 
     it('processes valid lines while warning on invalid ones', async () => {
-      let warningMock: jest.SpiedFunction<typeof actionsCore.warning>
-      warningMock = jest.spyOn(actionsCore, 'warning').mockImplementation()
+      const warningMock: jest.SpiedFunction<typeof actionsCore.warning> = jest
+        .spyOn(actionsCore, 'warning')
+        .mockImplementation()
 
       execMock.mockImplementation(async (cmd, args, options) => {
         if (options?.listeners?.stdout) {
