@@ -81,21 +81,28 @@ jobs:
             - ThisIsNotASupportedTool
           EOF
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: setup-action
+
       - name: Test Local Action
         id: test-action
         continue-on-error: true
-        uses: ./
+        uses: ./setup-action/
         with:
           up: true
 
       - name: Check if action errored
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
+          ACTION_ERROR: ${{ steps.test-action.error }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
+          echo "Action errored: $ACTION_ERROR"
 
   test-action-check-error:
     name: GitHub Action Test (failing 'omni config check')
@@ -109,18 +116,25 @@ jobs:
           up: false  # Should be an object, the check should complain
           EOF
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: setup-action
+
       - name: Test Local Action
         id: test-action
         continue-on-error: true
-        uses: ./
+        uses: ./setup-action/
         with:
           check: true
 
       - name: Check if action errored
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
+          ACTION_ERROR: ${{ steps.test-action.error }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
+          echo "Action errored: $ACTION_ERROR"
