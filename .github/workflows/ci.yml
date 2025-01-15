@@ -103,8 +103,6 @@ jobs:
             echo "Action did not error"
             exit 1
           fi
-          echo "Previous step failed with output: ${{ steps.test-action.outputs.* }}"
-          echo "Error message: ${{ steps.test-action.conclusion }}"
 
   test-action-check-error:
     name: GitHub Action Test (failing 'omni config check')
