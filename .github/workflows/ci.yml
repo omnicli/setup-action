@@ -85,7 +85,7 @@ jobs:
 
           cat >.omni.yaml <<EOF
           up:
-            - ThisIsNotASupportedTool
+            - this-is-not-a-supported-tool
           EOF
 
       - name: Test Local Action
