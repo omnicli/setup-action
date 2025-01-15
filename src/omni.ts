@@ -14,7 +14,14 @@ interface ExecOutput {
 
 const omni = async (args: string[]): Promise<number> =>
   actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    return actionsExec.exec('omni', args)
+    // Run the command and throw an error if it fails
+    let exit_code = await actionsExec.exec('omni', args)
+    if (exit_code !== 0) {
+      throw new Error(
+        `omni ${args.join(' ')} failed with exit code ${exit_code}`
+      )
+    }
+    return exit_code
   })
 
 const omniOutput = async (args: string[]): Promise<ExecOutput> =>

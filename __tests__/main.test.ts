@@ -177,6 +177,19 @@ describe('main.ts', () => {
 
       expect(omniUpMock).not.toHaveBeenCalled()
     })
+
+    it('handles up command failure', async () => {
+      setInputValues(getInputMock, getBooleanInputMock, { up: true })
+      setupMocks()
+      omniUpMock.mockImplementation(() => {
+        throw new Error('omni up failed with exit code 1')
+      })
+
+      await main.run_index()
+
+      expect(omniUpMock).toHaveBeenCalled()
+      expect(omniReshimMock).not.toHaveBeenCalled()
+    })
   })
 
   describe('check functionality', () => {
@@ -212,16 +225,21 @@ describe('main.ts', () => {
       expect(warningMock).not.toHaveBeenCalled()
     })
 
-    // TODO: Fix this test
-    // it('handles check command failure', async () => {
-    // setInputValues(getInputMock, getBooleanInputMock, { check: true })
-    // setupMocks({ version: '2025.1.0' })
-    // omniCheckMock.mockResolvedValue(1)
+    it('handles check command failure', async () => {
+      setInputValues(getInputMock, getBooleanInputMock, {
+        check: true,
+        up: true
+      })
+      setupMocks({ version: '2025.1.0' })
+      omniCheckMock.mockImplementation(() => {
+        throw new Error('omni config check failed with exit code 1')
+      })
 
-    // await main.run_index()
+      await main.run_index()
 
-    // expect(setFailedMock).toHaveBeenCalled()
-    // })
+      expect(omniCheckMock).toHaveBeenCalled()
+      expect(omniUpMock).not.toHaveBeenCalled()
+    })
   })
 
   describe('version-specific behavior', () => {

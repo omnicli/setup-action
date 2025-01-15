@@ -38,11 +38,6 @@ export async function run_index(): Promise<void> {
       await disableOmniAutoBootstrapUser()
     }
 
-    const runUp = actionsCore.getBooleanInput('up')
-    if (runUp) {
-      await omniUp(trusted)
-    }
-
     const runCheck = actionsCore.getBooleanInput('check')
     if (runCheck) {
       if (semver.satisfies(version, '>=2025.1.0')) {
@@ -55,13 +50,24 @@ export async function run_index(): Promise<void> {
       }
     }
 
+    const runUp = actionsCore.getBooleanInput('up')
+    if (runUp) {
+      await omniUp(trusted)
+    }
+
     if (semver.satisfies(version, '>=0.0.24')) {
       await omniReshim()
     }
 
     await setEnv(version)
   } catch (e) {
-    actionsCore.setFailed((e as Error).message)
+    const errorMessage = e instanceof Error ? e.message : String(e)
+    try {
+      actionsCore.setOutput('error', errorMessage)
+    } catch {
+      // Ignore any errors from setOutput
+    }
+    actionsCore.setFailed(errorMessage)
   }
 }
 
@@ -69,7 +75,13 @@ export async function run_post(): Promise<void> {
   try {
     await saveCache()
   } catch (error) {
-    if (error instanceof Error) actionsCore.setFailed(error.message)
-    else throw error
+    if (error instanceof Error) {
+      try {
+        actionsCore.setOutput('error', error.message)
+      } catch {
+        // Ignore any errors from setOutput
+      }
+      actionsCore.setFailed(error.message)
+    } else throw error
   }
 }

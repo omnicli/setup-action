@@ -45,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TYPESCRIPT_DEFAULT_STYLE: prettier
           VALIDATE_ALL_CODEBASE: true
-          VALIDATE_TYPESCRIPT_STANDARD: false  # Has been OOM-ing
+          VALIDATE_TYPESCRIPT_STANDARD: false # Has been OOM-ing
           VALIDATE_JAVASCRIPT_STANDARD: false
           VALIDATE_JSCPD: false
           VALIDATE_MARKDOWN: false
