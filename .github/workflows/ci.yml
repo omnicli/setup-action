@@ -73,18 +73,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Create empty git repository
-        run: |
-          git init
-          cat >.omni.yaml <<EOF
-          up:
-            - ThisIsNotASupportedTool
-          EOF
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
           path: setup-action
+
+      - name: Create empty git repository
+        run: |
+          git init
+          git remote add origin https://example.com/test-repo.git
+
+          cat >.omni.yaml <<EOF
+          up:
+            - ThisIsNotASupportedTool
+          EOF
 
       - name: Test Local Action
         id: test-action
@@ -96,30 +98,33 @@ jobs:
       - name: Check if action errored
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
-          ACTION_ERROR: ${{ steps.test-action.error }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
-          echo "Action errored: $ACTION_ERROR"
+          echo "Previous step failed with output: ${{ steps.test-action.outputs.* }}"
+          echo "Error message: ${{ steps.test-action.conclusion }}"
+
 
   test-action-check-error:
     name: GitHub Action Test (failing 'omni config check')
     runs-on: ubuntu-latest
 
     steps:
-      - name: Create empty git repository
-        run: |
-          git init
-          cat >.omni.yaml <<EOF
-          up: false  # Should be an object, the check should complain
-          EOF
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
           path: setup-action
+
+      - name: Create empty git repository
+        run: |
+          git init
+          git remote add origin https://example.com/test-repo.git
+
+          cat >.omni.yaml <<EOF
+          up: false  # Should be an object, the check should complain
+          EOF
 
       - name: Test Local Action
         id: test-action
@@ -131,10 +136,8 @@ jobs:
       - name: Check if action errored
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
-          ACTION_ERROR: ${{ steps.test-action.error }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
-          echo "Action errored: $ACTION_ERROR"
