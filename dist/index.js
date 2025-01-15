@@ -90108,6 +90108,16 @@ async function run_index() {
         if (runUp) {
             await (0, omni_1.omniUp)(trusted);
         }
+        const runCheck = actionsCore.getBooleanInput('check');
+        if (runCheck) {
+            if (semver.satisfies(version, '>=2025.1.0')) {
+                await (0, omni_1.omniCheck)();
+            }
+            else {
+                // Skip running since the command is not available
+                actionsCore.warning('omni config check is not available in this version');
+            }
+        }
         if (semver.satisfies(version, '>=0.0.24')) {
             await (0, omni_1.omniReshim)();
         }
@@ -90161,7 +90171,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.omniReshim = exports.omniTrust = void 0;
+exports.omniCheck = exports.omniReshim = exports.omniTrust = void 0;
 exports.omniUp = omniUp;
 exports.omniVersion = omniVersion;
 exports.omniHookEnv = omniHookEnv;
@@ -90269,6 +90279,34 @@ const omniTrust = async () => omni(['config', 'trust']);
 exports.omniTrust = omniTrust;
 const omniReshim = async () => omni(['config', 'reshim']);
 exports.omniReshim = omniReshim;
+const omniCheck = async () => {
+    const cmdArgs = ['config', 'check', '--local'];
+    // Split patterns by newlines or colons and filter empty strings
+    const patterns = (actionsCore.getInput('check_patterns') || '')
+        .split(/[\n:]/)
+        .map((p) => p.trim())
+        .filter(Boolean);
+    for (const pattern of patterns) {
+        cmdArgs.push('--pattern', pattern);
+    }
+    // Split ignore/select by newlines or commas and filter empty strings
+    const ignore = (actionsCore.getInput('check_ignore') || '')
+        .split(/[\n,]/)
+        .map((i) => i.trim())
+        .filter(Boolean);
+    for (const ign of ignore) {
+        cmdArgs.push('--ignore', ign);
+    }
+    const select = (actionsCore.getInput('check_select') || '')
+        .split(/[\n,]/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+    for (const sel of select) {
+        cmdArgs.push('--select', sel);
+    }
+    return omni(cmdArgs);
+};
+exports.omniCheck = omniCheck;
 async function disableOmniAutoBootstrapUser() {
     await (0, utils_1.writeFile)(`${process.env.HOME}/.config/omni/config.yaml`, 'up_command:\n  auto_bootstrap: false\n');
 }
@@ -90359,8 +90397,8 @@ async function getReleaseUrl(version, platform, arch) {
     }
     actionsCore.info(`Found release: ${release.tag_name}`);
     const asset = release.assets.find((a) => 
-    // Asset should be a .tar.gz
-    a.name.endsWith('.tar.gz') &&
+    // Asset should be a .tar.gz or .zip file
+    (a.name.endsWith('.tar.gz') || a.name.endsWith('.zip')) &&
         // Asset should be for the platform
         a.name.includes(platform) &&
         // Asset should be for the architecture
