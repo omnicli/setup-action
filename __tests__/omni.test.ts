@@ -74,6 +74,13 @@ describe('omni.ts', () => {
         'Failed to parse omni version'
       )
     })
+
+    it('handles command failure', async () => {
+      execMock.mockImplementation(async () => {
+        throw new Error('failed')
+      })
+      await expect(omni.omniVersion()).rejects.toThrow('failed')
+    })
   })
 
   describe('omniUp', () => {
@@ -175,10 +182,10 @@ describe('omni.ts', () => {
     })
 
     it('handles command failure', async () => {
-      execMock.mockImplementation(async (cmd, args, options) => {
+      execMock.mockImplementation(async () => {
         throw new Error('failed')
       })
-      expect(omni.omniUp(true)).rejects.toThrow('failed')
+      await expect(omni.omniUp(true)).rejects.toThrow('failed')
     })
   })
 
@@ -267,10 +274,10 @@ describe('omni.ts', () => {
     })
 
     it('handles command failure', async () => {
-      execMock.mockImplementation(async (cmd, args, options) => {
+      execMock.mockImplementation(async () => {
         throw new Error('failed')
       })
-      expect(omni.omniCheck()).rejects.toThrow('failed')
+      await expect(omni.omniCheck()).rejects.toThrow('failed')
     })
   })
 
@@ -383,6 +390,13 @@ describe('omni.ts', () => {
         'Failed to get omni hook env (1)'
       )
     })
+
+    it('handles command failure', async () => {
+      execMock.mockImplementation(async () => {
+        throw new Error('failed')
+      })
+      await expect(omni.omniHookEnv()).rejects.toThrow('failed')
+    })
   })
 
   describe('omniTrust', () => {
@@ -393,6 +407,13 @@ describe('omni.ts', () => {
       expect(result).toBe(0)
       expect(execMock).toHaveBeenCalledWith('omni', ['config', 'trust'])
     })
+
+    it('handles command failure', async () => {
+      execMock.mockImplementation(async () => {
+        throw new Error('failed')
+      })
+      await expect(omni.omniTrust()).rejects.toThrow('failed')
+    })
   })
 
   describe('omniReshim', () => {
@@ -402,6 +423,13 @@ describe('omni.ts', () => {
 
       expect(result).toBe(0)
       expect(execMock).toHaveBeenCalledWith('omni', ['config', 'reshim'])
+    })
+
+    it('handles command failure', async () => {
+      execMock.mockImplementation(async () => {
+        throw new Error('failed')
+      })
+      await expect(omni.omniReshim()).rejects.toThrow('failed')
     })
   })
 
