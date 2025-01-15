@@ -142,6 +142,38 @@ export const omniTrust = async (): Promise<number> => omni(['config', 'trust'])
 export const omniReshim = async (): Promise<number> =>
   omni(['config', 'reshim'])
 
+export const omniCheck = async (): Promise<number> => {
+  const cmdArgs = ['config', 'check', '--local']
+
+  // Split patterns by newlines or colons and filter empty strings
+  const patterns = (actionsCore.getInput('check_patterns') || '')
+    .split(/[\n:]/)
+    .map((p: string) => p.trim())
+    .filter(Boolean)
+  for (const pattern of patterns) {
+    cmdArgs.push('--pattern', pattern)
+  }
+
+  // Split ignore/select by newlines or commas and filter empty strings
+  const ignore = (actionsCore.getInput('check_ignore') || '')
+    .split(/[\n,]/)
+    .map((i: string) => i.trim())
+    .filter(Boolean)
+  for (const ign of ignore) {
+    cmdArgs.push('--ignore', ign)
+  }
+
+  const select = (actionsCore.getInput('check_select') || '')
+    .split(/[\n,]/)
+    .map((s: string) => s.trim())
+    .filter(Boolean)
+  for (const sel of select) {
+    cmdArgs.push('--select', sel)
+  }
+
+  return omni(cmdArgs)
+}
+
 export async function disableOmniAutoBootstrapUser(): Promise<void> {
   await writeFile(
     `${process.env.HOME}/.config/omni/config.yaml`,

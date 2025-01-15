@@ -15,11 +15,11 @@ commands:
 
   test:
     desc: 'Run tests'
-    run: npm test
+    run: npm test -- "$@"
 
   lint:
     desc: 'Run linter'
-    run: npm run lint
+    run: npm run lint -- "$@"
 
   release:
     desc: 'Release a new version'

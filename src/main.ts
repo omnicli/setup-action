@@ -9,6 +9,7 @@ import {
   omniUp,
   omniTrust,
   omniReshim,
+  omniCheck,
   disableOmniAutoBootstrapUser
 } from './omni'
 import { setup } from './setup'
@@ -37,6 +38,18 @@ export async function run_index(): Promise<void> {
       await disableOmniAutoBootstrapUser()
     }
 
+    const runCheck = actionsCore.getBooleanInput('check')
+    if (runCheck) {
+      if (semver.satisfies(version, '>=2025.1.0')) {
+        await omniCheck()
+      } else {
+        // Skip running since the command is not available
+        actionsCore.warning(
+          'omni config check is not available in this version'
+        )
+      }
+    }
+
     const runUp = actionsCore.getBooleanInput('up')
     if (runUp) {
       await omniUp(trusted)
@@ -48,7 +61,8 @@ export async function run_index(): Promise<void> {
 
     await setEnv(version)
   } catch (e) {
-    actionsCore.setFailed((e as Error).message)
+    const errorMessage = e instanceof Error ? e.message : String(e)
+    actionsCore.setFailed(errorMessage)
   }
 }
 

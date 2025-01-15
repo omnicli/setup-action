@@ -44,8 +44,8 @@ jobs:
         id: npm-ci-test
         run: npm run ci-test
 
-  test-action:
-    name: GitHub Actions Test
+  test-action-success:
+    name: GitHub Action Test
     runs-on: ubuntu-latest
 
     steps:
@@ -58,6 +58,7 @@ jobs:
         uses: ./
         with:
           up: true
+          check: true
 
       - name: Print environment
         id: env
@@ -66,3 +67,74 @@ jobs:
       - name: Print Output
         id: output
         run: echo "${{ toJSON(steps.test-action.outputs) }}"
+
+  test-action-up-error:
+    name: GitHub Action Test (failing 'omni up')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: setup-action
+
+      - name: Create empty git repository
+        run: |
+          git init
+          git remote add origin https://example.com/test-repo.git
+
+          cat >.omni.yaml <<EOF
+          up:
+            - this-is-not-a-supported-tool
+          EOF
+
+      - name: Test Local Action
+        id: test-action
+        continue-on-error: true
+        uses: ./setup-action/
+        with:
+          up: true
+
+      - name: Check if action errored
+        env:
+          ACTION_OUTCOME: ${{ steps.test-action.outcome }}
+        run: |
+          if [[ "$ACTION_OUTCOME" == "success" ]]; then
+            echo "Action did not error"
+            exit 1
+          fi
+
+  test-action-check-error:
+    name: GitHub Action Test (failing 'omni config check')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: setup-action
+
+      - name: Create empty git repository
+        run: |
+          git init
+          git remote add origin https://example.com/test-repo.git
+
+          cat >.omni.yaml <<EOF
+          up: false  # Should be an object, the check should complain
+          EOF
+
+      - name: Test Local Action
+        id: test-action
+        continue-on-error: true
+        uses: ./setup-action/
+        with:
+          check: true
+
+      - name: Check if action errored
+        env:
+          ACTION_OUTCOME: ${{ steps.test-action.outcome }}
+        run: |
+          if [[ "$ACTION_OUTCOME" == "success" ]]; then
+            echo "Action did not error"
+            exit 1
+          fi
