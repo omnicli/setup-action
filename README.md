@@ -44,6 +44,10 @@ steps:
 | `version`          | The version of omni to install                                                                                                  | `latest` |
 | `up`               | Whether or not to run `omni up` after installing omni                                                                           | `false`  |
 | `up_args`          | Additional arguments to pass to `omni up`                                                                                       | `null`   |
+| `check`            | Whether or not to run `omni config check` after installing omni                                                                 | `false`  |
+| `check_patterns`   | Additional patterns to check for when running `omni config check`; must provide one pattern per line                            | `null`   |
+| `check_ignore`     | Error codes to ignore when running `omni config check`; must provide one error code per line                                    | `null`   |
+| `check_select`     | Error codes to select when running `omni config check`; must provide one error code per line                                    | `null`   |
 | `cache`            | Cache omni's environment using GitHub's cache                                                                                   | `true`   |
 | `cache_write`      | Whether or not to disable the cache write, while still allowing cache reads                                                     | `true`   |
 | `cache_check_hash` | Whether or not to check the hash of the cache contents before saving the cache, to save on transfer times if the cache is large | `true`   |
