@@ -59,9 +59,9 @@ export default defineConfig([
     settings: {
       'import/resolver': {
         typescript: {
-          project: ["./tsconfig.json", "./.github/linters/tsconfig.json"],
+          project: ['./tsconfig.json', './.github/linters/tsconfig.json'],
           alwaysTryTypes: true,
-          noWarnOnMultipleProjects: true,
+          noWarnOnMultipleProjects: true
         },
         node: {
           extensions: ['.js', '.ts']
