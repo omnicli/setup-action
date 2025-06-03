@@ -72,14 +72,14 @@
     "@actions/github": "^6.0.0",
     "@actions/glob": "^0.4.0",
     "@actions/tool-cache": "^2.0.2",
-    "@octokit/openapi-types": "^22.2.0",
+    "@octokit/openapi-types": "^25.0.0",
     "semver": "^7.6.0",
     "shell-quote": "^1.8.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^20.14.9",
+    "@types/node": "^22.10.7",
     "@types/semver": "^7.5.8",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
     "@typescript-eslint/parser": "^7.15.0",
