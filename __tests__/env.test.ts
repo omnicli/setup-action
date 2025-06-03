@@ -215,7 +215,7 @@ describe('env.ts', () => {
 
     it('handles errors and returns false', async () => {
       // Simulate error by removing required properties
-      // eslint-disable-next-line no-extra-semi
+
       ;(actionsGithub as any).context = {}
 
       const result = await env.setOrg()
