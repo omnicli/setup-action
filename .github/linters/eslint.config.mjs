@@ -33,7 +33,7 @@ export default defineConfig([
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: ['./.github/linters/tsconfig.json', './tsconfig.json']
+        project: ['./tsconfig.json', './.github/linters/tsconfig.json']
       },
       ecmaVersion: 2023,
       sourceType: 'module',
@@ -59,8 +59,9 @@ export default defineConfig([
     settings: {
       'import/resolver': {
         typescript: {
-          project: './tsconfig.json',
-          alwaysTryTypes: true
+          project: ["./tsconfig.json", "./.github/linters/tsconfig.json"],
+          alwaysTryTypes: true,
+          noWarnOnMultipleProjects: true,
         },
         node: {
           extensions: ['.js', '.ts']
