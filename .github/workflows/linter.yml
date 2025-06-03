@@ -48,7 +48,7 @@ jobs:
           FILTER_REGEX_EXCLUDE: dist/**/*
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: true
-          VALIDATE_TYPESCRIPT_ESLINT: false # Does not support eslint v9
+          VALIDATE_TYPESCRIPT_ES: false # Does not support eslint v9
           VALIDATE_TYPESCRIPT_STANDARD: false # Has been OOM-ing
           VALIDATE_JAVASCRIPT_STANDARD: false
           VALIDATE_JSCPD: false
