@@ -1,4 +1,4 @@
-/* eslint-disable import/first, filenames/match-regex */
+/* eslint-disable import/first */
 
 // Mock fs before any imports
 const fsPromises = {
