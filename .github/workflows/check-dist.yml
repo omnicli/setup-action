@@ -70,7 +70,7 @@ jobs:
 
       # This will fail the workflow if the PR wasn't created by Dependabot.
       - name: Fail on differences
-        if: ${{ steps.diff.outputs.fail_diff == 'true' }}
+        if: steps.diff.outputs.fail_diff == 'true'
         id: fail-diff
         run: |
           echo "Detected uncommitted changes after build. See status below:"
@@ -80,33 +80,31 @@ jobs:
       # If `dist/` was different than expected, and this was not a Dependabot
       # PR, upload the expected version as a workflow artifact.
       - name: Upload on differences
-        if: ${{ always() && steps.diff.outputs.has_diff == 'true' }}
+        if: always() && steps.diff.outputs.has_diff == 'true'
         id: upload
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
 
-      # If this is a Dependabot PR, and if this was successful, just enable auto-merge
+      # If this is a Dependabot PR, just enable auto-merge
       - name: Create application token
         uses: actions/create-github-app-token@v2
-        if:
-          ${{ steps.diff.outputs.has_diff != 'true' && env.IS_DEPENDABOT ==
-          'true' }}
+        if: env.IS_DEPENDABOT == 'true'
         id: app-token
         with:
           app-id: ${{ secrets.OMNICLI_APP_ID }}
           private-key: ${{ secrets.OMNICLI_PRIVATE_KEY }}
 
       - name: Enable auto-merge
-        if:
-          ${{ steps.diff.outputs.has_diff != 'true' && env.IS_DEPENDABOT ==
-          'true' }}
+        if: env.IS_DEPENDABOT == 'true'
         env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          REPOSITORY: ${{ github.repository }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          NUM=$(gh pr view "${{ env.PR_BRANCH }}" \
-                  --repo "${{ github.repository }}" \
+          NUM=$(gh pr view "$HEAD_REF" \
+                  --repo "$REPOSITORY" \
                   --json number --jq '.number' || \
                 echo "")
 
