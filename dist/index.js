@@ -7698,6 +7698,7 @@ class Context {
         this.action = process.env.GITHUB_ACTION;
         this.actor = process.env.GITHUB_ACTOR;
         this.job = process.env.GITHUB_JOB;
+        this.runAttempt = parseInt(process.env.GITHUB_RUN_ATTEMPT, 10);
         this.runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
         this.runId = parseInt(process.env.GITHUB_RUN_ID, 10);
         this.apiUrl = (_a = process.env.GITHUB_API_URL) !== null && _a !== void 0 ? _a : `https://api.github.com`;
@@ -65458,8 +65459,8 @@ module.exports = function quote(xs) {
 		if (s && typeof s === 'object') {
 			return s.op.replace(/(.)/g, '\\$1');
 		}
-		if ((/["\s]/).test(s) && !(/'/).test(s)) {
-			return "'" + s.replace(/(['\\])/g, '\\$1') + "'";
+		if ((/["\s\\]/).test(s) && !(/'/).test(s)) {
+			return "'" + s.replace(/(['])/g, '\\$1') + "'";
 		}
 		if ((/["'\s]/).test(s)) {
 			return '"' + s.replace(/(["\\$`!])/g, '\\$1') + '"';
