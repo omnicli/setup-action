@@ -20,6 +20,11 @@ on:
 permissions:
   contents: read
 
+env:
+  IS_DEPENDABOT:
+    ${{ github.event.pull_request && github.actor == 'dependabot[bot]'
+    && 'true' || 'false' }}
+
 jobs:
   check-dist:
     name: Check dist/
@@ -53,10 +58,6 @@ jobs:
       # Check if there are differences
       - name: Check for differences
         id: diff
-        env:
-          IS_DEPENDABOT:
-            ${{ github.event.pull_request && github.actor == 'dependabot[bot]'
-            && 'true' || 'false' }}
         run: |
           if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
             echo "has_diff=true" | tee -a $GITHUB_OUTPUT
@@ -85,6 +86,33 @@ jobs:
         with:
           name: dist
           path: dist/
+
+      # If this is a Dependabot PR, and if this was successful, just enable auto-merge
+      - name: Create application token
+        uses: actions/create-github-app-token@v2
+        if: ${{ steps.diff.outputs.has_diff != 'true' && env.IS_DEPENDABOT == 'true' }}
+        id: app-token
+        with:
+          app-id: ${{ secrets.OMNICLI_APP_ID }}
+          private-key: ${{ secrets.OMNICLI_PRIVATE_KEY }}
+
+      - name: Enable auto-merge
+        if: ${{ steps.diff.outputs.has_diff != 'true' && env.IS_DEPENDABOT == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          NUM=$(gh pr view "${{ env.PR_BRANCH }}" \
+                  --repo "${{ github.repository }}" \
+                  --json number --jq '.number' || \
+                echo "")
+
+          if [[ -z "$NUM" ]]; then
+            echo "Failed to get PR number"
+            exit 1
+          fi
+
+          gh pr merge --squash --auto --body "" "$NUM"
+
 
   commit-dist:
     name: Commit dist/
