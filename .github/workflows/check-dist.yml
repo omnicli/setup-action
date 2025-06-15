@@ -118,9 +118,12 @@ jobs:
           echo "chore: update dist/ directory" | tee commit.txt
 
       - name: git commit
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+          git switch --force-create "${HEAD_REF}"
           git add ./dist
           git commit --no-verify --file=commit.txt
 
@@ -128,7 +131,7 @@ jobs:
         env:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          git push --no-verify --force "HEAD:${HEAD_REF}"
+          git push --no-verify --force --set-upstream origin "${HEAD_REF}"
 
   fail-after-commit:
     name: Fail after commit
