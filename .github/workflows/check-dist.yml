@@ -121,8 +121,10 @@ jobs:
           git commit --no-verify --file=commit.txt
 
       - name: git push
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          git push --no-verify --force HEAD:${{ github.head_ref }}
+          git push --no-verify --force "HEAD:${HEAD_REF}"
 
   fail-after-commit:
     name: Fail after commit
