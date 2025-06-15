@@ -66,7 +66,7 @@ jobs:
           fi
 
       # This will fail the workflow if the PR wasn't created by Dependabot.
-      - name: Compare Directories
+      - name: Fail on differences
         if: ${{ steps.diff.outputs.fail_diff == 'true' }}
         id: fail-diff
         run: |
@@ -76,8 +76,8 @@ jobs:
 
       # If `dist/` was different than expected, and this was not a Dependabot
       # PR, upload the expected version as a workflow artifact.
-      - name: Upload Artifact
-        if: ${{ steps.diff.outputs.has_diff == 'true' }}
+      - name: Upload on differences
+        if: ${{ always() && steps.diff.outputs.has_diff == 'true' }}
         id: upload
         uses: actions/upload-artifact@v4
         with:
