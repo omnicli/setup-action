@@ -91,7 +91,7 @@ jobs:
     needs: check-dist
     if: needs.check-dist.outputs.commit_diff == 'true'
 
-    jobs:
+    steps:
       - name: Create application token
         uses: actions/create-github-app-token@v2
         id: app-token
