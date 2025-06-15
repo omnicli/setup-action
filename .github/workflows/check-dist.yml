@@ -52,7 +52,9 @@ jobs:
       - name: Check for differences
         id: diff
         env:
-          IS_DEPENDABOT: ${{ github.event.pull_request && github.actor == 'dependabot[bot]' && 'true' || 'false' }}
+          IS_DEPENDABOT:
+            ${{ github.event.pull_request && github.actor == 'dependabot[bot]'
+            && 'true' || 'false' }}
         run: |
           if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
             echo "has_diff=true" | tee -a $GITHUB_OUTPUT
@@ -65,7 +67,7 @@ jobs:
 
       # This will fail the workflow if the PR wasn't created by Dependabot.
       - name: Compare Directories
-        if : ${{ steps.diff.outputs.fail_diff == 'true' }}
+        if: ${{ steps.diff.outputs.fail_diff == 'true' }}
         id: fail-diff
         run: |
           echo "Detected uncommitted changes after build. See status below:"
@@ -81,7 +83,6 @@ jobs:
         with:
           name: dist
           path: dist/
-
 
   commit-dist:
     name: Commit dist/
