@@ -37,24 +37,6 @@ steps:
       version: 0.0.23
 ```
 
-### Retry Configuration
-
-You can configure `omni up` to retry on failure with customizable retry behavior:
-
-```yaml
-steps:
-  - name: Install omni with retry
-    uses: omnicli/setup-action@v0
-    with:
-      up: true
-      up_retries: 3
-      up_retry_delay: 2000
-      up_retry_jitter: 20
-      up_retry_backoff: 1.5
-```
-
-This example will retry `omni up` up to 3 times with a base delay of 2 seconds, 20% jitter, and 1.5x backoff multiplier between attempts.
-
 ### Inputs
 
 | Parameter          | Description                                                                                                                     | Default  |
