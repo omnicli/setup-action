@@ -17,6 +17,70 @@ const omni = async (args: string[]): Promise<number> =>
     return actionsExec.exec('omni', args)
   })
 
+const sleep = async (ms: number): Promise<void> =>
+  new Promise(resolve => setTimeout(resolve, ms))
+
+const withRetry = async (
+  operation: () => Promise<number>,
+  operationName: string,
+  retries: number,
+  baseDelay: number,
+  jitter: number,
+  backoffMultiplier: number
+): Promise<number> => {
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const result = await operation()
+      if (result === 0) {
+        if (attempt > 0) {
+          actionsCore.info(
+            `${operationName} succeeded on attempt ${attempt + 1}`
+          )
+        }
+        return result
+      }
+
+      if (attempt === retries) {
+        actionsCore.error(
+          `${operationName} failed after ${retries + 1} attempts with exit code ${result}`
+        )
+        return result
+      }
+
+      const delay = baseDelay * Math.pow(backoffMultiplier, attempt)
+      const jitterMs = delay * (jitter / 100) * (Math.random() * 2 - 1)
+      const actualDelay = Math.max(0, delay + jitterMs)
+
+      actionsCore.warning(
+        `${operationName} failed with exit code ${result} on attempt ${attempt + 1}, retrying in ${Math.round(actualDelay)}ms...`
+      )
+      await sleep(actualDelay)
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+
+      if (attempt === retries) {
+        actionsCore.error(
+          `${operationName} failed after ${retries + 1} attempts: ${lastError.message}`
+        )
+        throw lastError
+      }
+
+      const delay = baseDelay * Math.pow(backoffMultiplier, attempt)
+      const jitterMs = delay * (jitter / 100) * (Math.random() * 2 - 1)
+      const actualDelay = Math.max(0, delay + jitterMs)
+
+      actionsCore.warning(
+        `${operationName} failed on attempt ${attempt + 1}: ${lastError.message}, retrying in ${Math.round(actualDelay)}ms...`
+      )
+      await sleep(actualDelay)
+    }
+  }
+
+  throw lastError || new Error(`${operationName} failed after all retries`)
+}
+
 const omniOutput = async (args: string[]): Promise<ExecOutput> =>
   actionsCore.group(
     `Running omni ${args.join(' ')} (grab output)`,
@@ -72,7 +136,28 @@ export async function omniUp(trusted: boolean): Promise<number> {
     up_args.push(...['--trust', 'always'])
   }
 
-  return omni(['up', ...up_args])
+  const retries = parseInt(actionsCore.getInput('up_retries') || '0', 10)
+  const baseDelay = parseInt(
+    actionsCore.getInput('up_retry_delay') || '1000',
+    10
+  )
+  const jitter = parseInt(actionsCore.getInput('up_retry_jitter') || '10', 10)
+  const backoffMultiplier = parseFloat(
+    actionsCore.getInput('up_retry_backoff') || '1'
+  )
+
+  if (retries === 0) {
+    return omni(['up', ...up_args])
+  }
+
+  return withRetry(
+    async () => omni(['up', ...up_args]),
+    'omni up',
+    retries,
+    baseDelay,
+    jitter,
+    backoffMultiplier
+  )
 }
 
 export async function omniVersion(): Promise<string> {

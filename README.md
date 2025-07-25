@@ -37,6 +37,24 @@ steps:
       version: 0.0.23
 ```
 
+### Retry Configuration
+
+You can configure `omni up` to retry on failure with customizable retry behavior:
+
+```yaml
+steps:
+  - name: Install omni with retry
+    uses: omnicli/setup-action@v0
+    with:
+      up: true
+      up_retries: 3
+      up_retry_delay: 2000
+      up_retry_jitter: 20
+      up_retry_backoff: 1.5
+```
+
+This example will retry `omni up` up to 3 times with a base delay of 2 seconds, 20% jitter, and 1.5x backoff multiplier between attempts.
+
 ### Inputs
 
 | Parameter          | Description                                                                                                                     | Default  |
@@ -44,6 +62,10 @@ steps:
 | `version`          | The version of omni to install                                                                                                  | `latest` |
 | `up`               | Whether or not to run `omni up` after installing omni                                                                           | `false`  |
 | `up_args`          | Additional arguments to pass to `omni up`                                                                                       | `null`   |
+| `up_retries`       | Number of times to retry `omni up` if it fails (0 = no retries)                                                                | `0`      |
+| `up_retry_delay`   | Base delay in milliseconds between retry attempts                                                                               | `1000`   |
+| `up_retry_jitter`  | Jitter percentage to add randomness to retry delays                                                                             | `10`     |
+| `up_retry_backoff` | Backoff multiplier for exponential backoff between retries                                                                     | `1`      |
 | `check`            | Whether or not to run `omni config check` after installing omni                                                                 | `false`  |
 | `check_patterns`   | Additional patterns to check for when running `omni config check`; must provide one pattern per line                            | `null`   |
 | `check_ignore`     | Error codes to ignore when running `omni config check`; must provide one error code per line                                    | `null`   |

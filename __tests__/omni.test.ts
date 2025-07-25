@@ -87,6 +87,10 @@ describe('omni.ts', () => {
     beforeEach(() => {
       getInputMock.mockImplementation(name => {
         if (name === 'up_args') return '--foo --bar'
+        if (name === 'up_retries') return '0'
+        if (name === 'up_retry_delay') return '1000'
+        if (name === 'up_retry_jitter') return '10'
+        if (name === 'up_retry_backoff') return '1'
         throw new Error(`Unexpected input: ${name}`)
       })
     })
@@ -126,6 +130,10 @@ describe('omni.ts', () => {
     it('preserves bootstrap flags when provided', async () => {
       getInputMock.mockImplementation(name => {
         if (name === 'up_args') return '--bootstrap --foo'
+        if (name === 'up_retries') return '0'
+        if (name === 'up_retry_delay') return '1000'
+        if (name === 'up_retry_jitter') return '10'
+        if (name === 'up_retry_backoff') return '1'
         throw new Error(`Unexpected input: ${name}`)
       })
 
@@ -142,6 +150,10 @@ describe('omni.ts', () => {
     it('preserves --clone-suggested when provided', async () => {
       getInputMock.mockImplementation(name => {
         if (name === 'up_args') return '--foo --clone-suggested yes --bar'
+        if (name === 'up_retries') return '0'
+        if (name === 'up_retry_delay') return '1000'
+        if (name === 'up_retry_jitter') return '10'
+        if (name === 'up_retry_backoff') return '1'
         throw new Error(`Unexpected input: ${name}`)
       })
 
@@ -163,6 +175,10 @@ describe('omni.ts', () => {
     it('preserves --update-user-config when provided', async () => {
       getInputMock.mockImplementation(name => {
         if (name === 'up_args') return '--foo --update-user-config yes --bar'
+        if (name === 'up_retries') return '0'
+        if (name === 'up_retry_delay') return '1000'
+        if (name === 'up_retry_jitter') return '10'
+        if (name === 'up_retry_backoff') return '1'
         throw new Error(`Unexpected input: ${name}`)
       })
 
@@ -186,6 +202,64 @@ describe('omni.ts', () => {
         throw new Error('failed')
       })
       await expect(omni.omniUp(true)).rejects.toThrow('failed')
+    })
+
+    it('retries when configured and command fails', async () => {
+      getInputMock.mockImplementation(name => {
+        if (name === 'up_args') return '--foo --bar'
+        if (name === 'up_retries') return '2'
+        if (name === 'up_retry_delay') return '100'
+        if (name === 'up_retry_jitter') return '0'
+        if (name === 'up_retry_backoff') return '1'
+        throw new Error(`Unexpected input: ${name}`)
+      })
+
+      let callCount = 0
+      execMock.mockImplementation(async () => {
+        callCount++
+        if (callCount < 3) {
+          return 1 // Fail first two times
+        }
+        return 0 // Succeed on third try
+      })
+
+      const result = await omni.omniUp(true)
+      expect(result).toBe(0)
+      expect(execMock).toHaveBeenCalledTimes(3)
+    })
+
+    it('does not retry when retries is 0', async () => {
+      getInputMock.mockImplementation(name => {
+        if (name === 'up_args') return '--foo --bar'
+        if (name === 'up_retries') return '0'
+        if (name === 'up_retry_delay') return '1000'
+        if (name === 'up_retry_jitter') return '10'
+        if (name === 'up_retry_backoff') return '1'
+        throw new Error(`Unexpected input: ${name}`)
+      })
+
+      execMock.mockResolvedValue(1)
+      const result = await omni.omniUp(true)
+
+      expect(result).toBe(1)
+      expect(execMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('returns failure exit code after all retries exhausted', async () => {
+      getInputMock.mockImplementation(name => {
+        if (name === 'up_args') return '--foo --bar'
+        if (name === 'up_retries') return '2'
+        if (name === 'up_retry_delay') return '100'
+        if (name === 'up_retry_jitter') return '0'
+        if (name === 'up_retry_backoff') return '1'
+        throw new Error(`Unexpected input: ${name}`)
+      })
+
+      execMock.mockResolvedValue(1) // Always fail
+
+      const result = await omni.omniUp(true)
+      expect(result).toBe(1)
+      expect(execMock).toHaveBeenCalledTimes(3) // Initial + 2 retries
     })
   })
 
