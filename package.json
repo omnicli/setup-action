@@ -1,7 +1,7 @@
 {
   "name": "omni-setup-action",
   "description": "Action to install omni (https://omnicli.dev), and run \"omni up\" to prepare a dynamic environment",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "",
   "private": true,
   "homepage": "https://github.com/omnicli/setup-action",
