@@ -1,5 +1,5 @@
 up:
-  - node: 20.9.0
+  - node: 20.19.4
   - custom:
       name: Install dependencies
       meet: npm install
