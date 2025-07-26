@@ -44,10 +44,10 @@ steps:
 | `version`          | The version of omni to install                                                                                                  | `latest` |
 | `up`               | Whether or not to run `omni up` after installing omni                                                                           | `false`  |
 | `up_args`          | Additional arguments to pass to `omni up`                                                                                       | `null`   |
-| `up_retries`       | Number of times to retry `omni up` if it fails (0 = no retries)                                                                | `0`      |
+| `up_retries`       | Number of times to retry `omni up` if it fails (0 = no retries)                                                                 | `0`      |
 | `up_retry_delay`   | Base delay in milliseconds between retry attempts                                                                               | `1000`   |
 | `up_retry_jitter`  | Jitter percentage to add randomness to retry delays                                                                             | `10`     |
-| `up_retry_backoff` | Backoff multiplier for exponential backoff between retries                                                                     | `1`      |
+| `up_retry_backoff` | Backoff multiplier for exponential backoff between retries                                                                      | `1`      |
 | `check`            | Whether or not to run `omni config check` after installing omni                                                                 | `false`  |
 | `check_patterns`   | Additional patterns to check for when running `omni config check`; must provide one pattern per line                            | `null`   |
 | `check_ignore`     | Error codes to ignore when running `omni config check`; must provide one error code per line                                    | `null`   |
