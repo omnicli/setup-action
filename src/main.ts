@@ -16,6 +16,18 @@ import { setup } from './setup'
 
 export async function run_index(): Promise<void> {
   try {
+    // Export GH_TOKEN for child processes (like omni up) if a token is available
+    // Check for a GitHub token using the same approach as setup.ts
+    const potentialTokens = [
+      process.env.GITHUB_TOKEN,
+      process.env.GH_TOKEN,
+      actionsCore.getInput('github_token')
+    ]
+    const ghToken = potentialTokens.find(t => t !== undefined && t !== '')
+    if (ghToken && !process.env.GH_TOKEN) {
+      actionsCore.exportVariable('GH_TOKEN', ghToken)
+    }
+
     const useCache = actionsCore.getBooleanInput('cache')
     if (useCache) {
       await restoreCache()

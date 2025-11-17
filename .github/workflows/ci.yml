@@ -60,6 +60,8 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           up: true
           check: true
@@ -99,6 +101,8 @@ jobs:
         id: test-action
         continue-on-error: true
         uses: ./setup-action/
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           up: true
 
@@ -135,6 +139,8 @@ jobs:
         id: test-action
         continue-on-error: true
         uses: ./setup-action/
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           check: true
 

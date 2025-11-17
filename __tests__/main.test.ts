@@ -43,6 +43,7 @@ let getInputMock: jest.SpiedFunction<typeof actionsCore.getInput>
 let getBooleanInputMock: jest.SpiedFunction<typeof actionsCore.getBooleanInput>
 let setFailedMock: jest.SpiedFunction<typeof actionsCore.setFailed>
 let warningMock: jest.SpiedFunction<typeof actionsCore.warning>
+let exportVariableMock: jest.SpiedFunction<typeof actionsCore.exportVariable>
 
 function setInputValues(
   getInput: jest.SpiedFunction<typeof actionsCore.getInput>,
@@ -60,7 +61,8 @@ function setInputValues(
     check: false,
     check_patterns: '',
     check_ignore: '',
-    check_select: ''
+    check_select: '',
+    github_token: ''
   }
   for (const [key, value] of Object.entries(overrideInputs)) {
     if (key in inputs) {
@@ -111,6 +113,9 @@ describe('main.ts', () => {
       .mockImplementation()
     setFailedMock = jest.spyOn(actionsCore, 'setFailed').mockImplementation()
     warningMock = jest.spyOn(actionsCore, 'warning').mockImplementation()
+    exportVariableMock = jest
+      .spyOn(actionsCore, 'exportVariable')
+      .mockImplementation()
   })
 
   describe('basic functionality', () => {
