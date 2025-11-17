@@ -263,12 +263,12 @@ describe('omni.ts', () => {
         error = err
       }
 
-      expect(error).toBeInstanceOf(omni.ContextualizedError)
-      expect((error as omni.ContextualizedError).returnCode).toBe(1)
+      expect(error).toBeInstanceOf(omni.ExecContextError)
+      expect((error as omni.ExecContextError).returnCode).toBe(1)
       expect(execMock).toHaveBeenCalledTimes(1)
     })
 
-    it('throws ContextualizedError after all retries exhausted', async () => {
+    it('throws ExecContextError after all retries exhausted', async () => {
       getInputMock.mockImplementation(name => {
         if (name === 'up_args') return '--foo --bar'
         if (name === 'up_retries') return '2'
@@ -287,8 +287,8 @@ describe('omni.ts', () => {
         error = err
       }
 
-      expect(error).toBeInstanceOf(omni.ContextualizedError)
-      expect((error as omni.ContextualizedError).returnCode).toBe(1)
+      expect(error).toBeInstanceOf(omni.ExecContextError)
+      expect((error as omni.ExecContextError).returnCode).toBe(1)
       expect(execMock).toHaveBeenCalledTimes(3) // Initial + 2 retries
     })
   })

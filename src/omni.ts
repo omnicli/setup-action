@@ -4,7 +4,7 @@ import * as actionsExec from '@actions/exec'
 // @ts-expect-error There is no declaration file for this package
 import { parse } from 'shell-quote'
 
-import { ContextualizedError } from './error'
+import { ExecContextError, ExecContext } from './error'
 import { writeFile } from './utils'
 
 interface ExecOutput {
@@ -13,44 +13,21 @@ interface ExecOutput {
   stderr: string
 }
 
-export { ContextualizedError }
+export { ExecContextError }
 
 const omni = async (args: string[]): Promise<number> =>
   actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    let stdout = ''
-    let stderr = ''
     const command = `omni ${args.join(' ')}`
+    const ctx = new ExecContext(command)
 
     try {
       const returnCode = await actionsExec.exec('omni', args, {
-        listeners: {
-          stdout: (data: Buffer) => {
-            stdout += data.toString()
-          },
-          stderr: (data: Buffer) => {
-            stderr += data.toString()
-          }
-        }
+        listeners: ctx.listeners()
       })
-
-      if (returnCode !== 0) {
-        throw new ContextualizedError(
-          `Process exited with code ${returnCode}`,
-          stdout,
-          stderr,
-          command,
-          returnCode
-        )
-      }
-
+      ctx.setReturnCode(returnCode)
       return returnCode
     } catch (error) {
-      if (error instanceof ContextualizedError) {
-        throw error
-      }
-      const originalMessage =
-        error instanceof Error ? error.message : String(error)
-      throw new ContextualizedError(originalMessage, stdout, stderr, command)
+      return ctx.throwWithError(error)
     }
   })
 

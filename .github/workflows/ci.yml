@@ -119,8 +119,14 @@ jobs:
           echo "Failure reason: $FAILURE_REASON"
 
           # Verify it failed at omni up
-          if [[ ! "$FAILURE_REASON" =~ ^"omni up:" ]]; then
+          if [[ ! "$FAILURE_REASON" =~ ^"omni up " ]]; then
             echo "Error: Expected failure at 'omni up' but got: $FAILURE_REASON"
+            exit 1
+          fi
+
+          # Verify the reason for the failure
+          if [[ "$FAILURE_REASON" != *"failed to resolve tool"* ]]; then
+            echo "Error: Expected failure reason to mention 'failed to resolve tool' but got: $FAILURE_REASON"
             exit 1
           fi
 
@@ -168,7 +174,7 @@ jobs:
           echo "Failure reason: $FAILURE_REASON"
 
           # Verify it failed at omni config check
-          if [[ ! "$FAILURE_REASON" =~ ^"omni config check:" ]]; then
+          if [[ ! "$FAILURE_REASON" =~ ^"omni config check " ]]; then
             echo "Error: Expected failure at 'omni config check' but got: $FAILURE_REASON"
             exit 1
           fi

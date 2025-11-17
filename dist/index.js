@@ -97030,8 +97030,8 @@ async function setEnv(version) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ContextualizedError = void 0;
-class ContextualizedError extends Error {
+exports.ExecContext = exports.ExecContextError = void 0;
+class ExecContextError extends Error {
     stdout;
     stderr;
     command;
@@ -97039,7 +97039,7 @@ class ContextualizedError extends Error {
     returnCode;
     constructor(message, stdout, stderr, command, returnCode) {
         super(message);
-        this.name = 'ContextualizedError';
+        this.name = 'ExecContextError';
         this.originalMessage = message;
         this.stdout = stdout;
         this.stderr = stderr;
@@ -97071,7 +97071,40 @@ class ContextualizedError extends Error {
         return this.message;
     }
 }
-exports.ContextualizedError = ContextualizedError;
+exports.ExecContextError = ExecContextError;
+class ExecContext {
+    command;
+    stdout;
+    stderr;
+    constructor(command) {
+        this.command = command;
+        this.stdout = '';
+        this.stderr = '';
+    }
+    listeners() {
+        return {
+            stdout: (data) => {
+                this.stdout += data.toString();
+            },
+            stderr: (data) => {
+                this.stderr += data.toString();
+            }
+        };
+    }
+    setReturnCode(returnCode) {
+        if (returnCode !== 0) {
+            throw new ExecContextError(`Process exited with code ${returnCode}`, this.stdout, this.stderr, this.command, returnCode);
+        }
+    }
+    throwWithError(error) {
+        if (error instanceof ExecContextError) {
+            throw error;
+        }
+        const originalMessage = error instanceof Error ? error.message : String(error);
+        throw new ExecContextError(originalMessage, this.stdout, this.stderr, this.command);
+    }
+}
+exports.ExecContext = ExecContext;
 
 
 /***/ }),
@@ -97233,7 +97266,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.omniCheck = exports.omniReshim = exports.omniTrust = exports.ContextualizedError = void 0;
+exports.omniCheck = exports.omniReshim = exports.omniTrust = exports.ExecContextError = void 0;
 exports.omniUp = omniUp;
 exports.omniVersion = omniVersion;
 exports.omniHookEnv = omniHookEnv;
@@ -97243,34 +97276,20 @@ const actionsExec = __importStar(__nccwpck_require__(95236));
 // @ts-expect-error There is no declaration file for this package
 const shell_quote_1 = __nccwpck_require__(26591);
 const error_1 = __nccwpck_require__(11557);
-Object.defineProperty(exports, "ContextualizedError", ({ enumerable: true, get: function () { return error_1.ContextualizedError; } }));
+Object.defineProperty(exports, "ExecContextError", ({ enumerable: true, get: function () { return error_1.ExecContextError; } }));
 const utils_1 = __nccwpck_require__(71798);
 const omni = async (args) => actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    let stdout = '';
-    let stderr = '';
     const command = `omni ${args.join(' ')}`;
+    const ctx = new error_1.ExecContext(command);
     try {
         const returnCode = await actionsExec.exec('omni', args, {
-            listeners: {
-                stdout: (data) => {
-                    stdout += data.toString();
-                },
-                stderr: (data) => {
-                    stderr += data.toString();
-                }
-            }
+            listeners: ctx.listeners()
         });
-        if (returnCode !== 0) {
-            throw new error_1.ContextualizedError(`Process exited with code ${returnCode}`, stdout, stderr, command, returnCode);
-        }
+        ctx.setReturnCode(returnCode);
         return returnCode;
     }
     catch (error) {
-        if (error instanceof error_1.ContextualizedError) {
-            throw error;
-        }
-        const originalMessage = error instanceof Error ? error.message : String(error);
-        throw new error_1.ContextualizedError(originalMessage, stdout, stderr, command);
+        return ctx.throwWithError(error);
     }
 });
 const sleep = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
