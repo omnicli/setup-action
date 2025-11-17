@@ -35,39 +35,16 @@ export async function run_index(): Promise<void> {
       actionsCore.setOutput('cache-hit', false)
     }
 
-    try {
-      await setup()
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e)
-      actionsCore.setOutput('failure-reason', `setup: ${errorMessage}`)
-      throw e
+    await setup()
+
+    const version = await omniVersion()
+    if (!semver.valid(version)) {
+      throw new Error(`Invalid version: ${version}`)
     }
 
-    let version: string
-    try {
-      version = await omniVersion()
-      if (!semver.valid(version)) {
-        throw new Error(`Invalid version: ${version}`)
-      }
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e)
-      actionsCore.setOutput('failure-reason', `omni version: ${errorMessage}`)
-      throw e
-    }
-
-    let trusted: boolean
-    try {
-      trusted = semver.satisfies(version, '>=0.0.24')
-        ? (await omniTrust()) === 0
-        : await setOrg()
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e)
-      actionsCore.setOutput(
-        'failure-reason',
-        `omni config trust: ${errorMessage}`
-      )
-      throw e
-    }
+    const trusted = semver.satisfies(version, '>=0.0.24')
+      ? (await omniTrust()) === 0
+      : await setOrg()
 
     if (semver.satisfies(version, '<0.0.25')) {
       await disableOmniAutoBootstrapUser()
@@ -76,16 +53,7 @@ export async function run_index(): Promise<void> {
     const runCheck = actionsCore.getBooleanInput('check')
     if (runCheck) {
       if (semver.satisfies(version, '>=2025.1.0')) {
-        try {
-          await omniCheck()
-        } catch (e) {
-          const errorMessage = e instanceof Error ? e.message : String(e)
-          actionsCore.setOutput(
-            'failure-reason',
-            `omni config check: ${errorMessage}`
-          )
-          throw e
-        }
+        await omniCheck()
       } else {
         // Skip running since the command is not available
         actionsCore.warning(
@@ -96,13 +64,7 @@ export async function run_index(): Promise<void> {
 
     const runUp = actionsCore.getBooleanInput('up')
     if (runUp) {
-      try {
-        await omniUp(trusted)
-      } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : String(e)
-        actionsCore.setOutput('failure-reason', `omni up: ${errorMessage}`)
-        throw e
-      }
+      await omniUp(trusted)
     }
 
     if (semver.satisfies(version, '>=0.0.24')) {
@@ -112,6 +74,7 @@ export async function run_index(): Promise<void> {
     await setEnv(version)
   } catch (e) {
     const errorMessage = e instanceof Error ? e.message : String(e)
+    actionsCore.setOutput('failure-reason', errorMessage)
     actionsCore.setFailed(errorMessage)
   }
 }

@@ -97024,6 +97024,58 @@ async function setEnv(version) {
 
 /***/ }),
 
+/***/ 11557:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ContextualizedError = void 0;
+class ContextualizedError extends Error {
+    stdout;
+    stderr;
+    command;
+    originalMessage;
+    returnCode;
+    constructor(message, stdout, stderr, command, returnCode) {
+        super(message);
+        this.name = 'ContextualizedError';
+        this.originalMessage = message;
+        this.stdout = stdout;
+        this.stderr = stderr;
+        this.command = command;
+        this.returnCode = returnCode;
+        // Override message property to include command and stderr detail
+        const detail = this.getDetail();
+        if (command) {
+            this.message = `${command}: ${detail}`;
+        }
+        else {
+            this.message = detail;
+        }
+    }
+    getDetail() {
+        // Try to get the last line of stderr
+        const stderrTrimmed = this.stderr.trim();
+        if (stderrTrimmed) {
+            const stderrLines = stderrTrimmed.split('\n');
+            const lastLine = stderrLines[stderrLines.length - 1];
+            if (lastLine) {
+                return lastLine;
+            }
+        }
+        // Fall back to original message
+        return this.originalMessage;
+    }
+    toString() {
+        return this.message;
+    }
+}
+exports.ContextualizedError = ContextualizedError;
+
+
+/***/ }),
+
 /***/ 41730:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -97091,51 +97143,21 @@ async function run_index() {
         else {
             actionsCore.setOutput('cache-hit', false);
         }
-        try {
-            await (0, setup_1.setup)();
+        await (0, setup_1.setup)();
+        const version = await (0, omni_1.omniVersion)();
+        if (!semver.valid(version)) {
+            throw new Error(`Invalid version: ${version}`);
         }
-        catch (e) {
-            const errorMessage = e instanceof Error ? e.message : String(e);
-            actionsCore.setOutput('failure-reason', `setup: ${errorMessage}`);
-            throw e;
-        }
-        let version;
-        try {
-            version = await (0, omni_1.omniVersion)();
-            if (!semver.valid(version)) {
-                throw new Error(`Invalid version: ${version}`);
-            }
-        }
-        catch (e) {
-            const errorMessage = e instanceof Error ? e.message : String(e);
-            actionsCore.setOutput('failure-reason', `omni version: ${errorMessage}`);
-            throw e;
-        }
-        let trusted;
-        try {
-            trusted = semver.satisfies(version, '>=0.0.24')
-                ? (await (0, omni_1.omniTrust)()) === 0
-                : await (0, env_1.setOrg)();
-        }
-        catch (e) {
-            const errorMessage = e instanceof Error ? e.message : String(e);
-            actionsCore.setOutput('failure-reason', `omni config trust: ${errorMessage}`);
-            throw e;
-        }
+        const trusted = semver.satisfies(version, '>=0.0.24')
+            ? (await (0, omni_1.omniTrust)()) === 0
+            : await (0, env_1.setOrg)();
         if (semver.satisfies(version, '<0.0.25')) {
             await (0, omni_1.disableOmniAutoBootstrapUser)();
         }
         const runCheck = actionsCore.getBooleanInput('check');
         if (runCheck) {
             if (semver.satisfies(version, '>=2025.1.0')) {
-                try {
-                    await (0, omni_1.omniCheck)();
-                }
-                catch (e) {
-                    const errorMessage = e instanceof Error ? e.message : String(e);
-                    actionsCore.setOutput('failure-reason', `omni config check: ${errorMessage}`);
-                    throw e;
-                }
+                await (0, omni_1.omniCheck)();
             }
             else {
                 // Skip running since the command is not available
@@ -97144,14 +97166,7 @@ async function run_index() {
         }
         const runUp = actionsCore.getBooleanInput('up');
         if (runUp) {
-            try {
-                await (0, omni_1.omniUp)(trusted);
-            }
-            catch (e) {
-                const errorMessage = e instanceof Error ? e.message : String(e);
-                actionsCore.setOutput('failure-reason', `omni up: ${errorMessage}`);
-                throw e;
-            }
+            await (0, omni_1.omniUp)(trusted);
         }
         if (semver.satisfies(version, '>=0.0.24')) {
             await (0, omni_1.omniReshim)();
@@ -97160,6 +97175,7 @@ async function run_index() {
     }
     catch (e) {
         const errorMessage = e instanceof Error ? e.message : String(e);
+        actionsCore.setOutput('failure-reason', errorMessage);
         actionsCore.setFailed(errorMessage);
     }
 }
@@ -97217,7 +97233,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.omniCheck = exports.omniReshim = exports.omniTrust = void 0;
+exports.omniCheck = exports.omniReshim = exports.omniTrust = exports.ContextualizedError = void 0;
 exports.omniUp = omniUp;
 exports.omniVersion = omniVersion;
 exports.omniHookEnv = omniHookEnv;
@@ -97226,9 +97242,36 @@ const actionsCore = __importStar(__nccwpck_require__(37484));
 const actionsExec = __importStar(__nccwpck_require__(95236));
 // @ts-expect-error There is no declaration file for this package
 const shell_quote_1 = __nccwpck_require__(26591);
+const error_1 = __nccwpck_require__(11557);
+Object.defineProperty(exports, "ContextualizedError", ({ enumerable: true, get: function () { return error_1.ContextualizedError; } }));
 const utils_1 = __nccwpck_require__(71798);
 const omni = async (args) => actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    return actionsExec.exec('omni', args);
+    let stdout = '';
+    let stderr = '';
+    const command = `omni ${args.join(' ')}`;
+    try {
+        const returnCode = await actionsExec.exec('omni', args, {
+            listeners: {
+                stdout: (data) => {
+                    stdout += data.toString();
+                },
+                stderr: (data) => {
+                    stderr += data.toString();
+                }
+            }
+        });
+        if (returnCode !== 0) {
+            throw new error_1.ContextualizedError(`Process exited with code ${returnCode}`, stdout, stderr, command, returnCode);
+        }
+        return returnCode;
+    }
+    catch (error) {
+        if (error instanceof error_1.ContextualizedError) {
+            throw error;
+        }
+        const originalMessage = error instanceof Error ? error.message : String(error);
+        throw new error_1.ContextualizedError(originalMessage, stdout, stderr, command);
+    }
 });
 const sleep = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const withRetry = async (operation, operationName, retries, baseDelay, jitter, backoffMultiplier) => {
