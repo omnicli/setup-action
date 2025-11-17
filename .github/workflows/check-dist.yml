@@ -59,7 +59,9 @@ jobs:
       - name: Check for differences
         id: diff
         run: |
-          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
+          diff_lines="$(git diff --ignore-space-at-eol --text dist/ | wc -l)"
+          echo "diff_lines=$diff_lines" | tee -a $GITHUB_OUTPUT
+          if [ "$diff_lines" -gt "0" ]; then
             echo "has_diff=true" | tee -a $GITHUB_OUTPUT
             if [ "$IS_DEPENDABOT" = "true" ]; then
               echo "commit_diff=true" | tee -a $GITHUB_OUTPUT
