@@ -3,12 +3,11 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 
+import * as actionsCore from '@actions/core'
+import * as actionsGithub from '@actions/github'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-
-import * as actionsCore from '@actions/core'
-import * as actionsGithub from '@actions/github'
 
 import * as env from '../src/env'
 import * as omni from '../src/omni'
@@ -185,6 +184,7 @@ describe('env.ts', () => {
           repo: 'testrepo'
         }
       }
+      // biome-ignore lint/suspicious/noExplicitAny: needed for test mocking
       ;(actionsGithub as any).context = mockContext
     })
 
@@ -216,6 +216,7 @@ describe('env.ts', () => {
     it('handles errors and returns false', async () => {
       // Simulate error by removing required properties
 
+      // biome-ignore lint/suspicious/noExplicitAny: needed for test mocking
       ;(actionsGithub as any).context = {}
 
       const result = await env.setOrg()
@@ -247,7 +248,9 @@ describe('env.ts', () => {
         .mockImplementation()
       startGroupMock = jest
         .spyOn(actionsCore, 'startGroup')
-        .mockImplementation((_name: string) => {})
+        .mockImplementation((_name: string) => {
+          // Intentionally empty for mock
+        })
       omniHookEnvMock = jest.spyOn(omni, 'omniHookEnv').mockResolvedValue([])
 
       // Setup fs mocks
@@ -259,7 +262,7 @@ describe('env.ts', () => {
       writeFileMock.mockResolvedValue(undefined)
 
       // Setup path mocking
-      const configPath = '/home/user/.config/omni/config.yaml'
+      const _configPath = '/home/user/.config/omni/config.yaml'
       const configDir = '/home/user/.config/omni'
       joinMock.mockImplementation((...paths: string[]) => paths.join('/'))
       jest.spyOn(path, 'dirname').mockReturnValue(configDir)

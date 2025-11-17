@@ -25,11 +25,11 @@ describe('setup.ts', () => {
   let downloadToolMock: jest.SpiedFunction<typeof toolCache.downloadTool>
   let extractTarMock: jest.SpiedFunction<typeof toolCache.extractTar>
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let getCurrentPlatformMock: jest.SpiedFunction<
+  let _getCurrentPlatformMock: jest.SpiedFunction<
     typeof utils.getCurrentPlatform
   >
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let getCurrentArchMock: jest.SpiedFunction<typeof utils.getCurrentArch>
+  let _getCurrentArchMock: jest.SpiedFunction<typeof utils.getCurrentArch>
   let parseVersionMock: jest.SpiedFunction<typeof utils.parseVersion>
 
   beforeEach(() => {
@@ -52,10 +52,10 @@ describe('setup.ts', () => {
       .mockResolvedValue('/path/to/extract')
 
     // Mock utils functions
-    getCurrentPlatformMock = jest
+    _getCurrentPlatformMock = jest
       .spyOn(utils, 'getCurrentPlatform')
       .mockReturnValue('darwin')
-    getCurrentArchMock = jest
+    _getCurrentArchMock = jest
       .spyOn(utils, 'getCurrentArch')
       .mockReturnValue('x86_64')
     parseVersionMock = jest

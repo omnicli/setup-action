@@ -20,9 +20,9 @@ const setOrgMock = jest.spyOn(env, 'setOrg')
 
 // Mock the main functions
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const runIndexMock = jest.spyOn(main, 'run_index')
+const _runIndexMock = jest.spyOn(main, 'run_index')
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const runPostMock = jest.spyOn(main, 'run_post')
+const _runPostMock = jest.spyOn(main, 'run_post')
 
 // Mock the omni functions
 const omniVersionMock = jest.spyOn(omni, 'omniVersion')

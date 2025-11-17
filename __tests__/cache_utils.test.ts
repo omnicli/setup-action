@@ -34,12 +34,11 @@ jest.mock('fs', () => ({
  * Unit tests for cache utilities, src/cache_utils.ts
  */
 
-import * as fs from 'fs'
-import * as path from 'path'
-
 import * as actionsCore from '@actions/core'
 import * as actionsExec from '@actions/exec'
 import * as actionsGlob from '@actions/glob'
+import * as fs from 'fs'
+import * as path from 'path'
 
 import * as cacheUtils from '../src/cache_utils'
 import * as envModule from '../src/env'

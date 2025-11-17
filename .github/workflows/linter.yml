@@ -37,9 +37,9 @@ jobs:
         id: install
         run: npm ci
 
-      - name: Run eslint
-        id: eslint
-        run: npm run lint
+      - name: Run Biome
+        id: biome
+        run: npm run check
 
       - name: Lint Codebase
         id: super-linter
@@ -52,9 +52,11 @@ jobs:
           VALIDATE_TYPESCRIPT_ES: false # Does not support eslint v9
           VALIDATE_TYPESCRIPT_STANDARD: false # Has been OOM-ing
           VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_JAVASCRIPT_PRETTIER: false # Using Biome
+          VALIDATE_TYPESCRIPT_PRETTIER: false # Using Biome
           VALIDATE_JSCPD: false
           VALIDATE_MARKDOWN: false
-          VALIDATE_BIOME_FORMAT: false
-          VALIDATE_BIOME_LINT: false
+          VALIDATE_BIOME_FORMAT: true
+          VALIDATE_BIOME_LINT: true
           VALIDATE_CHECKOV: false
           VALIDATE_TRIVY: false

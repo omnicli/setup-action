@@ -1,9 +1,8 @@
-import * as fs from 'fs'
-import * as path from 'path'
-
 import * as actionsCore from '@actions/core'
 import * as actionsExec from '@actions/exec'
 import * as actionsGlob from '@actions/glob'
+import * as fs from 'fs'
+import * as path from 'path'
 
 import { omniDataHome } from './env'
 

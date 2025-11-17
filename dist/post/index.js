@@ -96773,13 +96773,13 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.saveCache = saveCache;
 exports.restoreCache = restoreCache;
-const path = __importStar(__nccwpck_require__(16928));
 const actionsCache = __importStar(__nccwpck_require__(5116));
 const actionsCore = __importStar(__nccwpck_require__(37484));
 const actionsGlob = __importStar(__nccwpck_require__(47206));
+const path = __importStar(__nccwpck_require__(16928));
+const cache_utils_1 = __nccwpck_require__(76895);
 const env_1 = __nccwpck_require__(78204);
 const utils_1 = __nccwpck_require__(71798);
-const cache_utils_1 = __nccwpck_require__(76895);
 async function saveCache() {
     const shouldCache = actionsCore.getState('CACHE') === 'true';
     if (!shouldCache) {
@@ -96885,11 +96885,11 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.hashCache = hashCache;
 exports.removeShims = removeShims;
-const fs = __importStar(__nccwpck_require__(79896));
-const path = __importStar(__nccwpck_require__(16928));
 const actionsCore = __importStar(__nccwpck_require__(37484));
 const actionsExec = __importStar(__nccwpck_require__(95236));
 const actionsGlob = __importStar(__nccwpck_require__(47206));
+const fs = __importStar(__nccwpck_require__(79896));
+const path = __importStar(__nccwpck_require__(16928));
 const env_1 = __nccwpck_require__(78204);
 async function hashCache(cachePaths) {
     actionsCore.info(`Hashing cache paths: ${cachePaths}`);
@@ -96965,12 +96965,12 @@ exports.omniDataHome = omniDataHome;
 exports.omniCacheHome = omniCacheHome;
 exports.setOrg = setOrg;
 exports.setEnv = setEnv;
-const semver = __importStar(__nccwpck_require__(62088));
+const actionsCore = __importStar(__nccwpck_require__(37484));
+const actionsGithub = __importStar(__nccwpck_require__(93228));
 const fs = __importStar(__nccwpck_require__(79896));
 const os = __importStar(__nccwpck_require__(70857));
 const path = __importStar(__nccwpck_require__(16928));
-const actionsGithub = __importStar(__nccwpck_require__(93228));
-const actionsCore = __importStar(__nccwpck_require__(37484));
+const semver = __importStar(__nccwpck_require__(62088));
 const omni_1 = __nccwpck_require__(11266);
 function omniDataHome() {
     let dataHome = actionsCore.getState('OMNI_DATA_HOME');
@@ -97103,6 +97103,7 @@ class ExecContextError extends Error {
             this.message = detail;
         }
     }
+    // biome-ignore lint/correctness/noUnusedPrivateClassMembers: used in constructor
     getDetail() {
         // Try to get the last line of stderr
         const stderrTrimmed = this.stderr.trim();
@@ -97199,8 +97200,8 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run_index = run_index;
 exports.run_post = run_post;
-const semver = __importStar(__nccwpck_require__(62088));
 const actionsCore = __importStar(__nccwpck_require__(37484));
+const semver = __importStar(__nccwpck_require__(62088));
 const cache_1 = __nccwpck_require__(97377);
 const env_1 = __nccwpck_require__(78204);
 const omni_1 = __nccwpck_require__(11266);
@@ -97555,9 +97556,9 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setup = setup;
-const semver = __importStar(__nccwpck_require__(62088));
 const actionsCore = __importStar(__nccwpck_require__(37484));
 const toolCache = __importStar(__nccwpck_require__(33472));
+const semver = __importStar(__nccwpck_require__(62088));
 const utils_1 = __nccwpck_require__(71798);
 async function getReleaseUrl(version, platform, arch) {
     // List releases from the GitHub API
@@ -97691,9 +97692,9 @@ exports.printVersion = printVersion;
 exports.getCurrentArch = getCurrentArch;
 exports.getCurrentPlatform = getCurrentPlatform;
 exports.writeFile = writeFile;
+const actionsCore = __importStar(__nccwpck_require__(37484));
 const fs = __importStar(__nccwpck_require__(79896));
 const os = __importStar(__nccwpck_require__(70857));
-const actionsCore = __importStar(__nccwpck_require__(37484));
 function parseVersion(version) {
     const matchDetails = version.match(/^[v]?(\d+)(?:\.(\d+)(?:\.(\d+))?)?$/);
     if (matchDetails) {

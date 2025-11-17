@@ -4,7 +4,7 @@ import * as actionsExec from '@actions/exec'
 // @ts-expect-error There is no declaration file for this package
 import { parse } from 'shell-quote'
 
-import { ExecContextError, ExecContext } from './error'
+import { ExecContext, ExecContextError } from './error'
 import { writeFile } from './utils'
 
 interface ExecOutput {

@@ -1,11 +1,9 @@
-import * as semver from 'semver'
-
+import * as actionsCore from '@actions/core'
+import * as actionsGithub from '@actions/github'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-
-import * as actionsGithub from '@actions/github'
-import * as actionsCore from '@actions/core'
+import * as semver from 'semver'
 
 import { omniHookEnv } from './omni'
 

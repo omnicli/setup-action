@@ -1,9 +1,7 @@
-import * as semver from 'semver'
-
 import * as actionsCore from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
-
 import type { components } from '@octokit/openapi-types'
+import * as semver from 'semver'
 
 import {
   getCurrentArch,

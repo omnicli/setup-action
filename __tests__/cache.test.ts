@@ -2,12 +2,12 @@
  * Unit tests for the action's cache functionality, src/cache.ts
  */
 
-import * as actionsCore from '@actions/core'
 import * as actionsCache from '@actions/cache'
+import * as actionsCore from '@actions/core'
 
 import * as cache from '../src/cache'
 import * as cacheUtils from '../src/cache_utils'
-import { omniDataHome, omniCacheHome } from '../src/env'
+import { omniCacheHome, omniDataHome } from '../src/env'
 
 // Mock the external dependencies
 jest.mock('@actions/core')

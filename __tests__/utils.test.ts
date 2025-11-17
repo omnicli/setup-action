@@ -2,9 +2,9 @@
  * Unit tests for utility functions, src/utils.ts
  */
 
+import * as actionsCore from '@actions/core'
 import * as fs from 'fs'
 import * as os from 'os'
-import * as actionsCore from '@actions/core'
 
 import * as utils from '../src/utils'
 

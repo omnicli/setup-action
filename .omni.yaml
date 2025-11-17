@@ -5,9 +5,9 @@ up:
       meet: npm install
 
 commands:
-  prettier:
-    desc: 'Run prettier'
-    run: npx prettier --write .
+  format:
+    desc: 'Format the code'
+    run: npm run format:write -- "$@"
 
   bundle:
     desc: 'Build the bundle'

@@ -29,6 +29,7 @@ export class ExecContextError extends Error {
     }
   }
 
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: used in constructor
   private getDetail(): string {
     // Try to get the last line of stderr
     const stderrTrimmed = this.stderr.trim()
@@ -64,10 +65,10 @@ export class ExecContext {
     stderr: (data: Buffer) => void
   } {
     return {
-      stdout: (data: Buffer) => {
+      stdout: (data: Buffer): void => {
         this.stdout += data.toString()
       },
-      stderr: (data: Buffer) => {
+      stderr: (data: Buffer): void => {
         this.stderr += data.toString()
       }
     }

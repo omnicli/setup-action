@@ -14,7 +14,7 @@ import * as utils from '../src/utils'
 // Mock the GitHub Actions core library
 let getInputMock: jest.SpiedFunction<typeof actionsCore.getInput>
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-let setFailedMock: jest.SpiedFunction<typeof actionsCore.setFailed>
+let _setFailedMock: jest.SpiedFunction<typeof actionsCore.setFailed>
 
 // Mock the GitHub Actions exec library
 let execMock: jest.SpiedFunction<typeof actionsExec.exec>
@@ -27,7 +27,7 @@ describe('omni.ts', () => {
     jest.clearAllMocks()
 
     getInputMock = jest.spyOn(actionsCore, 'getInput').mockImplementation()
-    setFailedMock = jest.spyOn(actionsCore, 'setFailed').mockImplementation()
+    _setFailedMock = jest.spyOn(actionsCore, 'setFailed').mockImplementation()
     execMock = jest.spyOn(actionsExec, 'exec').mockImplementation()
   })
 

@@ -1,7 +1,6 @@
+import * as actionsCore from '@actions/core'
 import * as fs from 'fs'
 import * as os from 'os'
-
-import * as actionsCore from '@actions/core'
 
 export function parseVersion(version: string): string {
   const matchDetails = version.match(/^[v]?(\d+)(?:\.(\d+)(?:\.(\d+))?)?$/)

@@ -1,12 +1,10 @@
-import * as path from 'path'
-
 import * as actionsCache from '@actions/cache'
 import * as actionsCore from '@actions/core'
 import * as actionsGlob from '@actions/glob'
-
-import { omniDataHome, omniCacheHome } from './env'
-import { getCurrentArch, getCurrentPlatform } from './utils'
+import * as path from 'path'
 import { hashCache, removeShims } from './cache_utils'
+import { omniCacheHome, omniDataHome } from './env'
+import { getCurrentArch, getCurrentPlatform } from './utils'
 
 export async function saveCache(): Promise<void> {
   const shouldCache = actionsCore.getState('CACHE') === 'true'

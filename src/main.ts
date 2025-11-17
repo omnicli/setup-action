@@ -1,16 +1,15 @@
-import * as semver from 'semver'
-
 import * as actionsCore from '@actions/core'
+import * as semver from 'semver'
 
 import { restoreCache, saveCache } from './cache'
 import { setEnv, setOrg } from './env'
 import {
-  omniVersion,
-  omniUp,
-  omniTrust,
-  omniReshim,
+  disableOmniAutoBootstrapUser,
   omniCheck,
-  disableOmniAutoBootstrapUser
+  omniReshim,
+  omniTrust,
+  omniUp,
+  omniVersion
 } from './omni'
 import { setup } from './setup'
 
