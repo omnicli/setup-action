@@ -117,7 +117,7 @@ jobs:
           fi
 
           # Download the workflow run logs for this specific job
-          gh run view ${{ github.run_id }} --log --job "${{ github.job }}" > job_logs.txt
+          gh run view --repo "${{ github.repository }}" ${{ github.run_id }} --log --job "${{ github.job }}" > job_logs.txt
 
           # Validate using the parse-logs script
           ./setup-action/.github/scripts/parse-logs.py job_logs.txt \
@@ -164,7 +164,7 @@ jobs:
           fi
 
           # Download the workflow run logs for this specific job
-          gh run view ${{ github.run_id }} --log --job "${{ github.job }}" > job_logs.txt
+          gh run view --repo "${{ github.repository }}" ${{ github.run_id }} --log --job "${{ github.job }}" > job_logs.txt
 
           # Validate using the parse-logs script
           ./setup-action/.github/scripts/parse-logs.py job_logs.txt \
