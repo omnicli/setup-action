@@ -133,6 +133,26 @@ describe('main.ts', () => {
       expect(setFailedMock).not.toHaveBeenCalled()
     })
 
+    it('exports GH_TOKEN when github_token is provided', async () => {
+      setInputValues(getInputMock, getBooleanInputMock, {
+        github_token: 'test-token'
+      })
+      setupMocks()
+
+      await main.run_index()
+
+      expect(exportVariableMock).toHaveBeenCalledWith('GH_TOKEN', 'test-token')
+    })
+
+    it('does not export GH_TOKEN when github_token is empty', async () => {
+      setInputValues(getInputMock, getBooleanInputMock, {})
+      setupMocks()
+
+      await main.run_index()
+
+      expect(exportVariableMock).not.toHaveBeenCalled()
+    })
+
     it('handles invalid version', async () => {
       setInputValues(getInputMock, getBooleanInputMock, {})
       setupMocks()
