@@ -101,7 +101,7 @@ describe('setup.ts', () => {
 
       // Verify GitHub API call
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/XaF/omni/releases',
+        'https://api.github.com/repos/xaf/omni/releases',
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'token mock-token'
@@ -147,7 +147,7 @@ describe('setup.ts', () => {
       await setup.setup()
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/XaF/omni/releases',
+        'https://api.github.com/repos/xaf/omni/releases',
         expect.objectContaining({
           headers: expect.not.objectContaining({
             Authorization: expect.any(String)
@@ -283,7 +283,7 @@ describe('setup.ts', () => {
       await setup.setup()
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/XaF/omni/releases',
+        'https://api.github.com/repos/xaf/omni/releases',
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'token env-token'

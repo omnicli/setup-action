@@ -22,7 +22,7 @@ async function getReleaseUrl(
 ): Promise<string> {
   // List releases from the GitHub API
   // https://developer.github.com/v3/repos/releases/#list-releases
-  const url = `https://api.github.com/repos/XaF/omni/releases`
+  const url = `https://api.github.com/repos/xaf/omni/releases`
   actionsCore.info(`Getting releases from ${url}`)
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github+json',

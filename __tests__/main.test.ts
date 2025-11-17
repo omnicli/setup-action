@@ -43,6 +43,7 @@ let getInputMock: jest.SpiedFunction<typeof actionsCore.getInput>
 let getBooleanInputMock: jest.SpiedFunction<typeof actionsCore.getBooleanInput>
 let setFailedMock: jest.SpiedFunction<typeof actionsCore.setFailed>
 let warningMock: jest.SpiedFunction<typeof actionsCore.warning>
+let exportVariableMock: jest.SpiedFunction<typeof actionsCore.exportVariable>
 
 function setInputValues(
   getInput: jest.SpiedFunction<typeof actionsCore.getInput>,
@@ -60,7 +61,8 @@ function setInputValues(
     check: false,
     check_patterns: '',
     check_ignore: '',
-    check_select: ''
+    check_select: '',
+    github_token: ''
   }
   for (const [key, value] of Object.entries(overrideInputs)) {
     if (key in inputs) {
@@ -111,6 +113,9 @@ describe('main.ts', () => {
       .mockImplementation()
     setFailedMock = jest.spyOn(actionsCore, 'setFailed').mockImplementation()
     warningMock = jest.spyOn(actionsCore, 'warning').mockImplementation()
+    exportVariableMock = jest
+      .spyOn(actionsCore, 'exportVariable')
+      .mockImplementation()
   })
 
   describe('basic functionality', () => {
@@ -126,6 +131,26 @@ describe('main.ts', () => {
       expect(omniTrustMock).toHaveBeenCalled()
       expect(setOrgMock).not.toHaveBeenCalledTimes(1)
       expect(setFailedMock).not.toHaveBeenCalled()
+    })
+
+    it('exports GH_TOKEN when github_token is provided', async () => {
+      setInputValues(getInputMock, getBooleanInputMock, {
+        github_token: 'test-token'
+      })
+      setupMocks()
+
+      await main.run_index()
+
+      expect(exportVariableMock).toHaveBeenCalledWith('GH_TOKEN', 'test-token')
+    })
+
+    it('does not export GH_TOKEN when github_token is empty', async () => {
+      setInputValues(getInputMock, getBooleanInputMock, {})
+      setupMocks()
+
+      await main.run_index()
+
+      expect(exportVariableMock).not.toHaveBeenCalled()
     })
 
     it('handles invalid version', async () => {

@@ -99,32 +99,40 @@ describe('omni.ts', () => {
       execMock.mockResolvedValue(0)
       await omni.omniUp(true)
 
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'up',
-        '--foo',
-        '--bar',
-        '--clone-suggested',
-        'no',
-        '--update-user-config',
-        'no'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        [
+          'up',
+          '--foo',
+          '--bar',
+          '--clone-suggested',
+          'no',
+          '--update-user-config',
+          'no'
+        ],
+        expect.any(Object)
+      )
     })
 
     it('runs omni up with trusted=false', async () => {
       execMock.mockResolvedValue(0)
       await omni.omniUp(false)
 
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'up',
-        '--foo',
-        '--bar',
-        '--clone-suggested',
-        'no',
-        '--update-user-config',
-        'no',
-        '--trust',
-        'always'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        [
+          'up',
+          '--foo',
+          '--bar',
+          '--clone-suggested',
+          'no',
+          '--update-user-config',
+          'no',
+          '--trust',
+          'always'
+        ],
+        expect.any(Object)
+      )
     })
 
     it('preserves bootstrap flags when provided', async () => {
@@ -140,11 +148,11 @@ describe('omni.ts', () => {
       execMock.mockResolvedValue(0)
       await omni.omniUp(true)
 
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'up',
-        '--bootstrap',
-        '--foo'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        ['up', '--bootstrap', '--foo'],
+        expect.any(Object)
+      )
     })
 
     it('preserves --clone-suggested when provided', async () => {
@@ -161,15 +169,19 @@ describe('omni.ts', () => {
       await omni.omniUp(true)
 
       // Should not add another --clone-suggested flag since it's already present
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'up',
-        '--foo',
-        '--clone-suggested',
-        'yes',
-        '--bar',
-        '--update-user-config',
-        'no'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        [
+          'up',
+          '--foo',
+          '--clone-suggested',
+          'yes',
+          '--bar',
+          '--update-user-config',
+          'no'
+        ],
+        expect.any(Object)
+      )
     })
 
     it('preserves --update-user-config when provided', async () => {
@@ -186,15 +198,19 @@ describe('omni.ts', () => {
       await omni.omniUp(true)
 
       // Should not add another --update-user-config flag since it's already present
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'up',
-        '--foo',
-        '--update-user-config',
-        'yes',
-        '--bar',
-        '--clone-suggested',
-        'no'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        [
+          'up',
+          '--foo',
+          '--update-user-config',
+          'yes',
+          '--bar',
+          '--clone-suggested',
+          'no'
+        ],
+        expect.any(Object)
+      )
     })
 
     it('handles command failure', async () => {
@@ -239,13 +255,20 @@ describe('omni.ts', () => {
       })
 
       execMock.mockResolvedValue(1)
-      const result = await omni.omniUp(true)
 
-      expect(result).toBe(1)
+      let error = null
+      try {
+        await omni.omniUp(true)
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).toBeInstanceOf(omni.ExecContextError)
+      expect((error as omni.ExecContextError).returnCode).toBe(1)
       expect(execMock).toHaveBeenCalledTimes(1)
     })
 
-    it('returns failure exit code after all retries exhausted', async () => {
+    it('throws ExecContextError after all retries exhausted', async () => {
       getInputMock.mockImplementation(name => {
         if (name === 'up_args') return '--foo --bar'
         if (name === 'up_retries') return '2'
@@ -257,8 +280,15 @@ describe('omni.ts', () => {
 
       execMock.mockResolvedValue(1) // Always fail
 
-      const result = await omni.omniUp(true)
-      expect(result).toBe(1)
+      let error = null
+      try {
+        await omni.omniUp(true)
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).toBeInstanceOf(omni.ExecContextError)
+      expect((error as omni.ExecContextError).returnCode).toBe(1)
       expect(execMock).toHaveBeenCalledTimes(3) // Initial + 2 retries
     })
   })
@@ -271,11 +301,11 @@ describe('omni.ts', () => {
     it('runs omni config check with no options', async () => {
       await omni.omniCheck()
 
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'config',
-        'check',
-        '--local'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        ['config', 'check', '--local'],
+        expect.any(Object)
+      )
     })
 
     it('runs with patterns', async () => {
@@ -288,17 +318,21 @@ describe('omni.ts', () => {
 
       await omni.omniCheck()
 
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'config',
-        'check',
-        '--local',
-        '--pattern',
-        '*.sh',
-        '--pattern',
-        '!test/*',
-        '--pattern',
-        'test.sh'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        [
+          'config',
+          'check',
+          '--local',
+          '--pattern',
+          '*.sh',
+          '--pattern',
+          '!test/*',
+          '--pattern',
+          'test.sh'
+        ],
+        expect.any(Object)
+      )
     })
 
     it('runs with ignore', async () => {
@@ -311,17 +345,21 @@ describe('omni.ts', () => {
 
       await omni.omniCheck()
 
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'config',
-        'check',
-        '--local',
-        '--ignore',
-        'M',
-        '--ignore',
-        'C00',
-        '--ignore',
-        'C102'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        [
+          'config',
+          'check',
+          '--local',
+          '--ignore',
+          'M',
+          '--ignore',
+          'C00',
+          '--ignore',
+          'C102'
+        ],
+        expect.any(Object)
+      )
     })
 
     it('runs with select', async () => {
@@ -334,17 +372,21 @@ describe('omni.ts', () => {
 
       await omni.omniCheck()
 
-      expect(execMock).toHaveBeenCalledWith('omni', [
-        'config',
-        'check',
-        '--local',
-        '--select',
-        'M',
-        '--select',
-        'C00',
-        '--select',
-        'C102'
-      ])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        [
+          'config',
+          'check',
+          '--local',
+          '--select',
+          'M',
+          '--select',
+          'C00',
+          '--select',
+          'C102'
+        ],
+        expect.any(Object)
+      )
     })
 
     it('handles command failure', async () => {
@@ -479,7 +521,11 @@ describe('omni.ts', () => {
       const result = await omni.omniTrust()
 
       expect(result).toBe(0)
-      expect(execMock).toHaveBeenCalledWith('omni', ['config', 'trust'])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        ['config', 'trust'],
+        expect.any(Object)
+      )
     })
 
     it('handles command failure', async () => {
@@ -496,7 +542,11 @@ describe('omni.ts', () => {
       const result = await omni.omniReshim()
 
       expect(result).toBe(0)
-      expect(execMock).toHaveBeenCalledWith('omni', ['config', 'reshim'])
+      expect(execMock).toHaveBeenCalledWith(
+        'omni',
+        ['config', 'reshim'],
+        expect.any(Object)
+      )
     })
 
     it('handles command failure', async () => {

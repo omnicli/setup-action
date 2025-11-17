@@ -48,7 +48,6 @@ const cacheTwirpClient = __importStar(__nccwpck_require__(96819));
 const config_1 = __nccwpck_require__(17606);
 const tar_1 = __nccwpck_require__(95321);
 const constants_1 = __nccwpck_require__(58287);
-const http_client_1 = __nccwpck_require__(54844);
 class ValidationError extends Error {
     constructor(message) {
         super(message);
@@ -85,17 +84,7 @@ function checkKey(key) {
  * @returns boolean return true if Actions cache service feature is available, otherwise false
  */
 function isFeatureAvailable() {
-    const cacheServiceVersion = (0, config_1.getCacheServiceVersion)();
-    // Check availability based on cache service version
-    switch (cacheServiceVersion) {
-        case 'v2':
-            // For v2, we need ACTIONS_RESULTS_URL
-            return !!process.env['ACTIONS_RESULTS_URL'];
-        case 'v1':
-        default:
-            // For v1, we only need ACTIONS_CACHE_URL
-            return !!process.env['ACTIONS_CACHE_URL'];
-    }
+    return !!process.env['ACTIONS_CACHE_URL'];
 }
 exports.isFeatureAvailable = isFeatureAvailable;
 /**
@@ -180,16 +169,8 @@ function restoreCacheV1(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 throw error;
             }
             else {
-                // warn on cache restore failure and continue build
-                // Log server errors (5xx) as errors, all other errors as warnings
-                if (typedError instanceof http_client_1.HttpClientError &&
-                    typeof typedError.statusCode === 'number' &&
-                    typedError.statusCode >= 500) {
-                    core.error(`Failed to restore: ${error.message}`);
-                }
-                else {
-                    core.warning(`Failed to restore: ${error.message}`);
-                }
+                // Supress all non-validation cache related errors because caching should be optional
+                core.warning(`Failed to restore: ${error.message}`);
             }
         }
         finally {
@@ -242,13 +223,7 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 core.debug(`Cache not found for version ${request.version} of keys: ${keys.join(', ')}`);
                 return undefined;
             }
-            const isRestoreKeyMatch = request.key !== response.matchedKey;
-            if (isRestoreKeyMatch) {
-                core.info(`Cache hit for restore-key: ${response.matchedKey}`);
-            }
-            else {
-                core.info(`Cache hit for: ${response.matchedKey}`);
-            }
+            core.info(`Cache hit for: ${request.key}`);
             if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                 core.info('Lookup only - skipping download');
                 return response.matchedKey;
@@ -273,15 +248,7 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
             }
             else {
                 // Supress all non-validation cache related errors because caching should be optional
-                // Log server errors (5xx) as errors, all other errors as warnings
-                if (typedError instanceof http_client_1.HttpClientError &&
-                    typeof typedError.statusCode === 'number' &&
-                    typedError.statusCode >= 500) {
-                    core.error(`Failed to restore: ${error.message}`);
-                }
-                else {
-                    core.warning(`Failed to restore: ${error.message}`);
-                }
+                core.warning(`Failed to restore: ${error.message}`);
             }
         }
         finally {
@@ -384,15 +351,7 @@ function saveCacheV1(paths, key, options, enableCrossOsArchive = false) {
                 core.info(`Failed to save: ${typedError.message}`);
             }
             else {
-                // Log server errors (5xx) as errors, all other errors as warnings
-                if (typedError instanceof http_client_1.HttpClientError &&
-                    typeof typedError.statusCode === 'number' &&
-                    typedError.statusCode >= 500) {
-                    core.error(`Failed to save: ${typedError.message}`);
-                }
-                else {
-                    core.warning(`Failed to save: ${typedError.message}`);
-                }
+                core.warning(`Failed to save: ${typedError.message}`);
             }
         }
         finally {
@@ -488,15 +447,7 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
                 core.info(`Failed to save: ${typedError.message}`);
             }
             else {
-                // Log server errors (5xx) as errors, all other errors as warnings
-                if (typedError instanceof http_client_1.HttpClientError &&
-                    typeof typedError.statusCode === 'number' &&
-                    typedError.statusCode >= 500) {
-                    core.error(`Failed to save: ${typedError.message}`);
-                }
-                else {
-                    core.warning(`Failed to save: ${typedError.message}`);
-                }
+                core.warning(`Failed to save: ${typedError.message}`);
             }
         }
         finally {
@@ -51759,10 +51710,6 @@ class RpcOutputStreamController {
             cmp: [],
         };
         this._closed = false;
-        // --- RpcOutputStream async iterator API
-        // iterator state.
-        // is undefined when no iterator has been acquired yet.
-        this._itState = { q: [] };
     }
     // --- RpcOutputStream callback API
     onNext(callback) {
@@ -51862,6 +51809,10 @@ class RpcOutputStreamController {
      *   messages are queued.
      */
     [Symbol.asyncIterator]() {
+        // init the iterator state, enabling pushIt()
+        if (!this._itState) {
+            this._itState = { q: [] };
+        }
         // if we are closed, we are definitely not receiving any more messages.
         // but we can't let the iterator get stuck. we want to either:
         // a) finish the new iterator immediately, because we are completed
@@ -51894,6 +51845,8 @@ class RpcOutputStreamController {
     // this either resolves a pending promise, or enqueues the result.
     pushIt(result) {
         let state = this._itState;
+        if (!state)
+            return;
         // is the consumer waiting for us?
         if (state.p) {
             // yes, consumer is waiting for this promise.
@@ -53805,7 +53758,6 @@ const reflection_equals_1 = __nccwpck_require__(4827);
 const binary_writer_1 = __nccwpck_require__(23957);
 const binary_reader_1 = __nccwpck_require__(92889);
 const baseDescriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf({}));
-const messageTypeDescriptor = baseDescriptors[message_type_contract_1.MESSAGE_TYPE] = {};
 /**
  * This standard message type provides reflection-based
  * operations to work with a message.
@@ -53816,8 +53768,7 @@ class MessageType {
         this.typeName = name;
         this.fields = fields.map(reflection_info_1.normalizeFieldInfo);
         this.options = options !== null && options !== void 0 ? options : {};
-        messageTypeDescriptor.value = this;
-        this.messagePrototype = Object.create(null, baseDescriptors);
+        this.messagePrototype = Object.create(null, Object.assign(Object.assign({}, baseDescriptors), { [message_type_contract_1.MESSAGE_TYPE]: { value: this } }));
         this.refTypeCheck = new reflection_type_check_1.ReflectionTypeCheck(this);
         this.refJsonReader = new reflection_json_reader_1.ReflectionJsonReader(this);
         this.refJsonWriter = new reflection_json_writer_1.ReflectionJsonWriter(this);
@@ -97073,6 +97024,91 @@ async function setEnv(version) {
 
 /***/ }),
 
+/***/ 11557:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ExecContext = exports.ExecContextError = void 0;
+class ExecContextError extends Error {
+    stdout;
+    stderr;
+    command;
+    originalMessage;
+    returnCode;
+    constructor(message, stdout, stderr, command, returnCode) {
+        super(message);
+        this.name = 'ExecContextError';
+        this.originalMessage = message;
+        this.stdout = stdout;
+        this.stderr = stderr;
+        this.command = command;
+        this.returnCode = returnCode;
+        // Override message property to include command and stderr detail
+        const detail = this.getDetail();
+        if (command) {
+            this.message = `${command}: ${detail}`;
+        }
+        else {
+            this.message = detail;
+        }
+    }
+    getDetail() {
+        // Try to get the last line of stderr
+        const stderrTrimmed = this.stderr.trim();
+        if (stderrTrimmed) {
+            const stderrLines = stderrTrimmed.split('\n');
+            const lastLine = stderrLines[stderrLines.length - 1];
+            if (lastLine) {
+                return lastLine;
+            }
+        }
+        // Fall back to original message
+        return this.originalMessage;
+    }
+    toString() {
+        return this.message;
+    }
+}
+exports.ExecContextError = ExecContextError;
+class ExecContext {
+    command;
+    stdout;
+    stderr;
+    constructor(command) {
+        this.command = command;
+        this.stdout = '';
+        this.stderr = '';
+    }
+    listeners() {
+        return {
+            stdout: (data) => {
+                this.stdout += data.toString();
+            },
+            stderr: (data) => {
+                this.stderr += data.toString();
+            }
+        };
+    }
+    setReturnCode(returnCode) {
+        if (returnCode !== 0) {
+            throw new ExecContextError(`Process exited with code ${returnCode}`, this.stdout, this.stderr, this.command, returnCode);
+        }
+    }
+    throwWithError(error) {
+        if (error instanceof ExecContextError) {
+            throw error;
+        }
+        const originalMessage = error instanceof Error ? error.message : String(error);
+        throw new ExecContextError(originalMessage, this.stdout, this.stderr, this.command);
+    }
+}
+exports.ExecContext = ExecContext;
+
+
+/***/ }),
+
 /***/ 41730:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -97122,6 +97158,17 @@ const omni_1 = __nccwpck_require__(11266);
 const setup_1 = __nccwpck_require__(58294);
 async function run_index() {
     try {
+        // Export GH_TOKEN for child processes (like omni up) if a token is available
+        // Check for a GitHub token using the same approach as setup.ts
+        const potentialTokens = [
+            process.env.GITHUB_TOKEN,
+            process.env.GH_TOKEN,
+            actionsCore.getInput('github_token')
+        ];
+        const ghToken = potentialTokens.find(t => t !== undefined && t !== '');
+        if (ghToken && !process.env.GH_TOKEN) {
+            actionsCore.exportVariable('GH_TOKEN', ghToken);
+        }
         const useCache = actionsCore.getBooleanInput('cache');
         if (useCache) {
             await (0, cache_1.restoreCache)();
@@ -97161,6 +97208,7 @@ async function run_index() {
     }
     catch (e) {
         const errorMessage = e instanceof Error ? e.message : String(e);
+        actionsCore.setOutput('failure-reason', errorMessage);
         actionsCore.setFailed(errorMessage);
     }
 }
@@ -97218,7 +97266,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.omniCheck = exports.omniReshim = exports.omniTrust = void 0;
+exports.omniCheck = exports.omniReshim = exports.omniTrust = exports.ExecContextError = void 0;
 exports.omniUp = omniUp;
 exports.omniVersion = omniVersion;
 exports.omniHookEnv = omniHookEnv;
@@ -97227,9 +97275,22 @@ const actionsCore = __importStar(__nccwpck_require__(37484));
 const actionsExec = __importStar(__nccwpck_require__(95236));
 // @ts-expect-error There is no declaration file for this package
 const shell_quote_1 = __nccwpck_require__(26591);
+const error_1 = __nccwpck_require__(11557);
+Object.defineProperty(exports, "ExecContextError", ({ enumerable: true, get: function () { return error_1.ExecContextError; } }));
 const utils_1 = __nccwpck_require__(71798);
 const omni = async (args) => actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    return actionsExec.exec('omni', args);
+    const command = `omni ${args.join(' ')}`;
+    const ctx = new error_1.ExecContext(command);
+    try {
+        const returnCode = await actionsExec.exec('omni', args, {
+            listeners: ctx.listeners()
+        });
+        ctx.setReturnCode(returnCode);
+        return returnCode;
+    }
+    catch (error) {
+        return ctx.throwWithError(error);
+    }
 });
 const sleep = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const withRetry = async (operation, operationName, retries, baseDelay, jitter, backoffMultiplier) => {
@@ -97452,7 +97513,7 @@ const utils_1 = __nccwpck_require__(71798);
 async function getReleaseUrl(version, platform, arch) {
     // List releases from the GitHub API
     // https://developer.github.com/v3/repos/releases/#list-releases
-    const url = `https://api.github.com/repos/XaF/omni/releases`;
+    const url = `https://api.github.com/repos/xaf/omni/releases`;
     actionsCore.info(`Getting releases from ${url}`);
     const headers = {
         Accept: 'application/vnd.github+json',
@@ -102084,7 +102145,7 @@ module.exports = parseParams
 /***/ ((module) => {
 
 "use strict";
-module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/cache","version":"4.0.5","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@protobuf-ts/runtime-rpc":"^2.11.1","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","semver":"^6.3.1"},"devDependencies":{"@types/node":"^22.13.9","@types/semver":"^6.0.0","@protobuf-ts/plugin":"^2.9.4","typescript":"^5.2.2"}}');
+module.exports = /*#__PURE__*/JSON.parse('{"name":"@actions/cache","version":"4.0.3","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","@protobuf-ts/plugin":"^2.9.4","semver":"^6.3.1"},"devDependencies":{"@types/node":"^22.13.9","@types/semver":"^6.0.0","typescript":"^5.2.2"}}');
 
 /***/ }),
 

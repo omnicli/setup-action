@@ -4,6 +4,7 @@ import * as actionsExec from '@actions/exec'
 // @ts-expect-error There is no declaration file for this package
 import { parse } from 'shell-quote'
 
+import { ExecContextError, ExecContext } from './error'
 import { writeFile } from './utils'
 
 interface ExecOutput {
@@ -12,9 +13,22 @@ interface ExecOutput {
   stderr: string
 }
 
+export { ExecContextError }
+
 const omni = async (args: string[]): Promise<number> =>
   actionsCore.group(`Running omni ${args.join(' ')}`, async () => {
-    return actionsExec.exec('omni', args)
+    const command = `omni ${args.join(' ')}`
+    const ctx = new ExecContext(command)
+
+    try {
+      const returnCode = await actionsExec.exec('omni', args, {
+        listeners: ctx.listeners()
+      })
+      ctx.setReturnCode(returnCode)
+      return returnCode
+    } catch (error) {
+      return ctx.throwWithError(error)
+    }
   })
 
 const sleep = async (ms: number): Promise<void> =>

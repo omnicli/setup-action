@@ -60,6 +60,8 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           up: true
           check: true
@@ -88,7 +90,7 @@ jobs:
       - name: Create empty git repository
         run: |
           git init
-          git remote add origin https://example.com/test-repo.git
+          git remote add origin https://example.com/test-owner/test-repo.git
 
           cat >.omni.yaml <<EOF
           up:
@@ -99,17 +101,36 @@ jobs:
         id: test-action
         continue-on-error: true
         uses: ./setup-action/
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           up: true
 
-      - name: Check if action errored
+      - name: Verify action failed at omni up
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
+          FAILURE_REASON: ${{ steps.test-action.outputs.failure-reason }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
+
+          echo "Failure reason: $FAILURE_REASON"
+
+          # Verify it failed at omni up
+          if [[ ! "$FAILURE_REASON" =~ ^"omni up " ]]; then
+            echo "Error: Expected failure at 'omni up' but got: $FAILURE_REASON"
+            exit 1
+          fi
+
+          # Verify the reason for the failure
+          if [[ "$FAILURE_REASON" != *"failed to resolve tool"* ]]; then
+            echo "Error: Expected failure reason to mention 'failed to resolve tool' but got: $FAILURE_REASON"
+            exit 1
+          fi
+
+          echo "✓ Action failed at omni up as expected"
 
   test-action-check-error:
     name: GitHub Action Test (failing 'omni config check')
@@ -125,7 +146,7 @@ jobs:
       - name: Create empty git repository
         run: |
           git init
-          git remote add origin https://example.com/test-repo.git
+          git remote add origin https://example.com/test-owner/test-repo.git
 
           cat >.omni.yaml <<EOF
           up: false  # Should be an object, the check should complain
@@ -135,14 +156,27 @@ jobs:
         id: test-action
         continue-on-error: true
         uses: ./setup-action/
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           check: true
 
-      - name: Check if action errored
+      - name: Verify action failed at omni config check
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
+          FAILURE_REASON: ${{ steps.test-action.outputs.failure-reason }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
+
+          echo "Failure reason: $FAILURE_REASON"
+
+          # Verify it failed at omni config check
+          if [[ ! "$FAILURE_REASON" =~ ^"omni config check " ]]; then
+            echo "Error: Expected failure at 'omni config check' but got: $FAILURE_REASON"
+            exit 1
+          fi
+
+          echo "✓ Action failed at omni config check as expected"
