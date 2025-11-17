@@ -84,7 +84,7 @@ jobs:
       - name: Upload on differences
         if: always() && steps.diff.outputs.has_diff == 'true'
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dist
           path: dist/
