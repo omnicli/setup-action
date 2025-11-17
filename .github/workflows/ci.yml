@@ -106,14 +106,23 @@ jobs:
         with:
           up: true
 
-      - name: Check if action errored
+      - name: Verify action failed at omni up
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
+
+          # Download the workflow run logs for this specific job
+          gh run view ${{ github.run_id }} --log --job "${{ github.job }}" > job_logs.txt
+
+          # Validate using the parse-logs script
+          ./setup-action/.github/scripts/parse-logs.py job_logs.txt \
+            --expect-outcome failure \
+            --expect-group-last-line "Running omni up=blah"
 
   test-action-check-error:
     name: GitHub Action Test (failing 'omni config check')
@@ -144,11 +153,20 @@ jobs:
         with:
           check: true
 
-      - name: Check if action errored
+      - name: Verify action failed at omni config check
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
+
+          # Download the workflow run logs for this specific job
+          gh run view ${{ github.run_id }} --log --job "${{ github.job }}" > job_logs.txt
+
+          # Validate using the parse-logs script
+          ./setup-action/.github/scripts/parse-logs.py job_logs.txt \
+            --expect-outcome failure \
+            --expect-group-last-line "Running omni config check=blah"
