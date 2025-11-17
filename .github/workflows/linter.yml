@@ -56,7 +56,5 @@ jobs:
           VALIDATE_TYPESCRIPT_PRETTIER: false # Using Biome
           VALIDATE_JSCPD: false
           VALIDATE_MARKDOWN: false
-          VALIDATE_BIOME_FORMAT: true
-          VALIDATE_BIOME_LINT: true
           VALIDATE_CHECKOV: false
           VALIDATE_TRIVY: false
