@@ -97091,21 +97091,51 @@ async function run_index() {
         else {
             actionsCore.setOutput('cache-hit', false);
         }
-        await (0, setup_1.setup)();
-        const version = await (0, omni_1.omniVersion)();
-        if (!semver.valid(version)) {
-            throw new Error(`Invalid version: ${version}`);
+        try {
+            await (0, setup_1.setup)();
         }
-        const trusted = semver.satisfies(version, '>=0.0.24')
-            ? (await (0, omni_1.omniTrust)()) === 0
-            : await (0, env_1.setOrg)();
+        catch (e) {
+            const errorMessage = e instanceof Error ? e.message : String(e);
+            actionsCore.setOutput('failure-reason', `setup: ${errorMessage}`);
+            throw e;
+        }
+        let version;
+        try {
+            version = await (0, omni_1.omniVersion)();
+            if (!semver.valid(version)) {
+                throw new Error(`Invalid version: ${version}`);
+            }
+        }
+        catch (e) {
+            const errorMessage = e instanceof Error ? e.message : String(e);
+            actionsCore.setOutput('failure-reason', `omni version: ${errorMessage}`);
+            throw e;
+        }
+        let trusted;
+        try {
+            trusted = semver.satisfies(version, '>=0.0.24')
+                ? (await (0, omni_1.omniTrust)()) === 0
+                : await (0, env_1.setOrg)();
+        }
+        catch (e) {
+            const errorMessage = e instanceof Error ? e.message : String(e);
+            actionsCore.setOutput('failure-reason', `omni config trust: ${errorMessage}`);
+            throw e;
+        }
         if (semver.satisfies(version, '<0.0.25')) {
             await (0, omni_1.disableOmniAutoBootstrapUser)();
         }
         const runCheck = actionsCore.getBooleanInput('check');
         if (runCheck) {
             if (semver.satisfies(version, '>=2025.1.0')) {
-                await (0, omni_1.omniCheck)();
+                try {
+                    await (0, omni_1.omniCheck)();
+                }
+                catch (e) {
+                    const errorMessage = e instanceof Error ? e.message : String(e);
+                    actionsCore.setOutput('failure-reason', `omni config check: ${errorMessage}`);
+                    throw e;
+                }
             }
             else {
                 // Skip running since the command is not available
@@ -97114,7 +97144,14 @@ async function run_index() {
         }
         const runUp = actionsCore.getBooleanInput('up');
         if (runUp) {
-            await (0, omni_1.omniUp)(trusted);
+            try {
+                await (0, omni_1.omniUp)(trusted);
+            }
+            catch (e) {
+                const errorMessage = e instanceof Error ? e.message : String(e);
+                actionsCore.setOutput('failure-reason', `omni up: ${errorMessage}`);
+                throw e;
+            }
         }
         if (semver.satisfies(version, '>=0.0.24')) {
             await (0, omni_1.omniReshim)();

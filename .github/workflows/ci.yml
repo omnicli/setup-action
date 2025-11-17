@@ -109,20 +109,22 @@ jobs:
       - name: Verify action failed at omni up
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
-          GH_TOKEN: ${{ github.token }}
+          FAILURE_REASON: ${{ steps.test-action.outputs.failure-reason }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
 
-          # Download the workflow run logs for this specific job
-          gh run view --repo "${{ github.repository }}" ${{ github.run_id }} --log --job "${{ github.job }}" > job_logs.txt
+          echo "Failure reason: $FAILURE_REASON"
 
-          # Validate using the parse-logs script
-          ./setup-action/.github/scripts/parse-logs.py job_logs.txt \
-            --expect-outcome failure \
-            --expect-group-last-line "Running omni up=blah"
+          # Verify it failed at omni up
+          if [[ ! "$FAILURE_REASON" =~ ^"omni up:" ]]; then
+            echo "Error: Expected failure at 'omni up' but got: $FAILURE_REASON"
+            exit 1
+          fi
+
+          echo "✓ Action failed at omni up as expected"
 
   test-action-check-error:
     name: GitHub Action Test (failing 'omni config check')
@@ -156,17 +158,19 @@ jobs:
       - name: Verify action failed at omni config check
         env:
           ACTION_OUTCOME: ${{ steps.test-action.outcome }}
-          GH_TOKEN: ${{ github.token }}
+          FAILURE_REASON: ${{ steps.test-action.outputs.failure-reason }}
         run: |
           if [[ "$ACTION_OUTCOME" == "success" ]]; then
             echo "Action did not error"
             exit 1
           fi
 
-          # Download the workflow run logs for this specific job
-          gh run view --repo "${{ github.repository }}" ${{ github.run_id }} --log --job "${{ github.job }}" > job_logs.txt
+          echo "Failure reason: $FAILURE_REASON"
 
-          # Validate using the parse-logs script
-          ./setup-action/.github/scripts/parse-logs.py job_logs.txt \
-            --expect-outcome failure \
-            --expect-group-last-line "Running omni config check=blah"
+          # Verify it failed at omni config check
+          if [[ ! "$FAILURE_REASON" =~ ^"omni config check:" ]]; then
+            echo "Error: Expected failure at 'omni config check' but got: $FAILURE_REASON"
+            exit 1
+          fi
+
+          echo "✓ Action failed at omni config check as expected"
