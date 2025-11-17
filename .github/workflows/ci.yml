@@ -90,7 +90,7 @@ jobs:
       - name: Create empty git repository
         run: |
           git init
-          git remote add origin https://example.com/test-repo.git
+          git remote add origin https://example.com/test-owner/test-repo.git
 
           cat >.omni.yaml <<EOF
           up:
@@ -129,7 +129,7 @@ jobs:
       - name: Create empty git repository
         run: |
           git init
-          git remote add origin https://example.com/test-repo.git
+          git remote add origin https://example.com/test-owner/test-repo.git
 
           cat >.omni.yaml <<EOF
           up: false  # Should be an object, the check should complain
