@@ -91,7 +91,7 @@ jobs:
 
       # If this is a Dependabot PR, just enable auto-merge
       - name: Create application token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         if: env.IS_DEPENDABOT == 'true'
         id: app-token
         with:
@@ -126,7 +126,7 @@ jobs:
 
     steps:
       - name: Create application token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: ${{ secrets.OMNICLI_APP_ID }}
