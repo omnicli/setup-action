@@ -29,4 +29,5 @@ updates:
       npm-production:
         dependency-type: production
         update-types:
+          - minor
           - patch
