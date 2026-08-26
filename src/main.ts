@@ -2,8 +2,8 @@ import * as semver from 'semver'
 
 import * as actionsCore from '@actions/core'
 
-import { restoreCache, saveCache } from './cache'
-import { setEnv, setOrg } from './env'
+import { restoreCache, saveCache } from './cache.js'
+import { setEnv, setOrg } from './env.js'
 import {
   omniVersion,
   omniUp,
@@ -11,8 +11,8 @@ import {
   omniReshim,
   omniCheck,
   disableOmniAutoBootstrapUser
-} from './omni'
-import { setup } from './setup'
+} from './omni.js'
+import { setup } from './setup.js'
 
 export async function run_index(): Promise<void> {
   try {

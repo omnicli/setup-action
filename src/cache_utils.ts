@@ -5,7 +5,7 @@ import * as actionsCore from '@actions/core'
 import * as actionsExec from '@actions/exec'
 import * as actionsGlob from '@actions/glob'
 
-import { omniDataHome } from './env'
+import { omniDataHome } from './env.js'
 
 export async function hashCache(cachePaths: string[]): Promise<string> {
   actionsCore.info(`Hashing cache paths: ${cachePaths}`)

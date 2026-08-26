@@ -7,7 +7,7 @@ import * as path from 'path'
 import * as actionsGithub from '@actions/github'
 import * as actionsCore from '@actions/core'
 
-import { omniHookEnv } from './omni'
+import { omniHookEnv } from './omni.js'
 
 export function omniDataHome(): string {
   let dataHome = actionsCore.getState('OMNI_DATA_HOME')

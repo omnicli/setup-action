@@ -3,8 +3,8 @@ import * as actionsExec from '@actions/exec'
 
 import { parse } from 'shell-quote'
 
-import { ExecContextError, ExecContext } from './error'
-import { writeFile } from './utils'
+import { ExecContextError, ExecContext } from './error.js'
+import { writeFile } from './utils.js'
 
 interface ExecOutput {
   returnCode: number

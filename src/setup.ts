@@ -10,7 +10,7 @@ import {
   getCurrentPlatform,
   parseVersion,
   printVersion
-} from './utils'
+} from './utils.js'
 
 type GitHubRelease = components['schemas']['release']
 type GitHubReleaseAsset = components['schemas']['release-asset']
