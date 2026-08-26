@@ -67,15 +67,15 @@
   },
   "dependencies": {
     "@actions/cache": "^5.0.3",
-    "@actions/core": "^3.0.0",
+    "@actions/core": "^3.0.1",
     "@actions/exec": "^3.0.0",
     "@actions/github": "^9.1.1",
     "@actions/glob": "^0.7.0",
     "@actions/tool-cache": "^4.0.0",
     "@eslint/migrate-config": "^3.0.2",
     "@octokit/openapi-types": "^27.0.0",
-    "semver": "^7.7.4",
-    "shell-quote": "^1.9.0"
+    "semver": "^7.8.5",
+    "shell-quote": "^1.10.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
@@ -83,7 +83,7 @@
     "@jest/globals": "^30.2.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.2.2",
-    "@types/semver": "^7.7.1",
+    "@types/semver": "^7.8.0",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.47.0",
     "@vercel/ncc": "^0.38.4",
