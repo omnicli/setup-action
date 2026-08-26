@@ -253,8 +253,8 @@ describe('env.ts', () => {
       // Setup fs mocks
       const mockedFs = jest.mocked(fs)
       mockedFs.existsSync.mockReturnValue(false)
-      mkdirMock = mockedFs.promises.mkdir as jest.Mock
-      writeFileMock = mockedFs.promises.writeFile as jest.Mock
+      mkdirMock = mockedFs.promises.mkdir
+      writeFileMock = mockedFs.promises.writeFile
       mkdirMock.mockResolvedValue(undefined)
       writeFileMock.mockResolvedValue(undefined)
 

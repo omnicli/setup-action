@@ -1,7 +1,6 @@
 import * as actionsCore from '@actions/core'
 import * as actionsExec from '@actions/exec'
 
-// @ts-expect-error There is no declaration file for this package
 import { parse } from 'shell-quote'
 
 import { ExecContextError, ExecContext } from './error'
@@ -116,7 +115,9 @@ const omniOutput = async (args: string[]): Promise<ExecOutput> =>
   )
 
 export async function omniUp(trusted: boolean): Promise<number> {
-  const up_args = parse(actionsCore.getInput('up_args').trim())
+  const up_args = parse(actionsCore.getInput('up_args').trim()).filter(
+    (arg): arg is string => typeof arg === 'string'
+  )
 
   let has_bootstrap_arg = false
   let has_clone_suggested_arg = false

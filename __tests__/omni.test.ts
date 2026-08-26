@@ -62,7 +62,7 @@ describe('omni.ts', () => {
       )
     })
 
-    it('throws error on unparseable version', async () => {
+    it('throws error on unparsable version', async () => {
       execMock.mockImplementation(async (cmd, args, options) => {
         if (options?.listeners?.stdout) {
           options.listeners.stdout(Buffer.from('invalid version format\n'))
