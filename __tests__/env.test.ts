@@ -1,6 +1,7 @@
 /**
  * Unit tests for env functionality, src/env.ts
  */
+// cspell:ignore afterAll
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 
 import * as fs from 'fs'

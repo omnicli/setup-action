@@ -1,4 +1,5 @@
 /* eslint-disable import/first */
+// cspell:ignore afterAll
 
 // Mock fs before any imports
 const fsPromises = {
