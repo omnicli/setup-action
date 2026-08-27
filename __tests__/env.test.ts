@@ -4,6 +4,7 @@
 // cspell:ignore afterAll
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 
+import { jest } from '@jest/globals'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
@@ -26,8 +27,6 @@ jest.mock('fs', () => ({
 }))
 jest.mock('os')
 jest.mock('path')
-jest.mock('@actions/core')
-jest.mock('@actions/github')
 jest.mock('../src/omni')
 
 describe('env.ts', () => {

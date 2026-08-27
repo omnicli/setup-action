@@ -2,6 +2,7 @@
  * Unit tests for setup functionality, src/setup.ts
  */
 
+import { jest } from '@jest/globals'
 import * as actionsCore from '@actions/core'
 import * as toolCache from '@actions/tool-cache'
 
@@ -9,8 +10,6 @@ import * as setup from '../src/setup'
 import * as utils from '../src/utils'
 
 // Mock external modules
-jest.mock('@actions/tool-cache')
-jest.mock('@actions/core')
 jest.mock('../src/utils')
 
 // Mock fetch globally

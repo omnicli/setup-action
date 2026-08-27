@@ -26,6 +26,7 @@ export default defineConfig([
     '**/node_modules/**',
     '**/dist/**',
     '**/coverage/**',
+    '**/__tests__/mocks/**',
     '**/*.json'
   ]),
 

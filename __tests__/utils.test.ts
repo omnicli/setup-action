@@ -2,6 +2,7 @@
  * Unit tests for utility functions, src/utils.ts
  */
 
+import { jest } from '@jest/globals'
 import * as fs from 'fs'
 import * as os from 'os'
 import * as actionsCore from '@actions/core'

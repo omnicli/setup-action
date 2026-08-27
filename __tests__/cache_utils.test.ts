@@ -1,6 +1,8 @@
 /* eslint-disable import/first */
 // cspell:ignore afterAll
 
+import { jest } from '@jest/globals'
+
 // Mock fs before any imports
 const fsPromises = {
   writeFile: jest.fn(),
@@ -46,9 +48,6 @@ import * as cacheUtils from '../src/cache_utils'
 import * as envModule from '../src/env'
 
 // Mock remaining external modules
-jest.mock('@actions/core')
-jest.mock('@actions/exec')
-jest.mock('@actions/glob')
 jest.mock('../src/env')
 
 describe('cache_utils.ts', () => {

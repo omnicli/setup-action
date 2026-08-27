@@ -2,6 +2,7 @@
  * Unit tests for the action's main functionality, src/main.ts
  */
 
+import { jest } from '@jest/globals'
 import * as actionsCore from '@actions/core'
 
 import * as cache from '../src/cache'

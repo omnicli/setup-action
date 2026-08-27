@@ -43,6 +43,15 @@
   "license": "MIT",
   "jest": {
     "preset": "ts-jest",
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1",
+      "^@actions/core$": "<rootDir>/__tests__/mocks/core.cjs",
+      "^@actions/cache$": "<rootDir>/__tests__/mocks/cache.cjs",
+      "^@actions/exec$": "<rootDir>/__tests__/mocks/exec.cjs",
+      "^@actions/github$": "<rootDir>/__tests__/mocks/github.cjs",
+      "^@actions/glob$": "<rootDir>/__tests__/mocks/glob.cjs",
+      "^@actions/tool-cache$": "<rootDir>/__tests__/mocks/tool-cache.cjs"
+    },
     "verbose": true,
     "clearMocks": true,
     "testEnvironment": "node",
@@ -58,7 +67,16 @@
       "/dist/"
     ],
     "transform": {
-      "^.+\\.ts$": "ts-jest"
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "module": "CommonJS",
+            "moduleResolution": "Node",
+            "esModuleInterop": false
+          }
+        }
+      ]
     },
     "coverageReporters": [
       "json-summary",

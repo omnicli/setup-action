@@ -2,6 +2,7 @@
  * Unit tests for the omni commands, src/omni.ts
  */
 
+import { jest } from '@jest/globals'
 import * as actionsCore from '@actions/core'
 import * as actionsExec from '@actions/exec'
 
