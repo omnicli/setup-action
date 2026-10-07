@@ -105,9 +105,9 @@
     "@eslint/js": "^9.39.5",
     "@jest/globals": "^30.5.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.3",
     "@types/semver": "^7.8.0",
-    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/eslint-plugin": "^8.71.0",
     "@typescript-eslint/parser": "^8.68.0",
     "@vercel/ncc": "^0.45.0",
     "eslint": "^9.39.5",
@@ -124,7 +124,7 @@
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.9.9",
     "prettier-eslint": "^17.1.2",
-    "ts-jest": "^29.4.13",
+    "ts-jest": "^29.4.14",
     "typescript": "^5.9.3"
   }
 }
