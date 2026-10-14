@@ -10281,18 +10281,20 @@ exports.parse = __nccwpck_require__(2696);
  * 	ParseEntry,
  * } from './parse' */
 
-// '<(' is process substitution operator and
+// '<(' and '>(' are process substitution operators and
 // can be parsed the same as control operator
 var CONTROL = /** @type {const} */ ('(?:') + /** @type {const} */ ([
 	'\\|\\|',
-	'\\&\\&',
-	';;',
-	'\\|\\&',
+	'\\&(?:\\&|>>?)', // `&&`, `&>`, and `&>>`
+	';;\\&?', // `;;` and `;;&`
+	'[;|]\\&', // `;&` and `|&`
 	'\\<\\(',
 	'\\<\\<\\<',
+	'\\<\\<-',
+	'\\<\\<(?!\\()', // `<<(` stays `<` and `<(`, as zsh reads it; other shells reject it
 	'>>',
-	'>\\&',
-	'<\\&',
+	'>[&|(]', // `>&`, `>|`, and `>(`
+	'<[&>]', // `<&` and `<>`
 	'[&;()|<>]'
 ]).join(/** @type {const} */ ('|')) + /** @type {const} */ (')');
 var controlRE = new RegExp('^' + CONTROL + '$');
@@ -10666,13 +10668,22 @@ module.exports = function parse(s, env, opts) {
 var OPS = /** @type {const} */ ([
 	'||',
 	'&&',
+	';;&',
 	';;',
+	';&',
 	'|&',
 	'<(',
+	'>(',
 	'<<<',
+	'<<-',
+	'<<',
 	'>>',
 	'>&',
+	'>|',
+	'&>>',
+	'&>',
 	'<&',
+	'<>',
 	'&',
 	';',
 	'(',
