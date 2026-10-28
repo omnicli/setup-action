@@ -107,7 +107,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.5",
     "@types/semver": "^7.8.0",
-    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/eslint-plugin": "^8.72.0",
     "@typescript-eslint/parser": "^8.68.0",
     "@vercel/ncc": "^0.45.0",
     "eslint": "^9.39.5",
@@ -124,7 +124,7 @@
     "make-coverage-badge": "^1.2.0",
     "prettier": "^3.9.10",
     "prettier-eslint": "^17.1.2",
-    "ts-jest": "^29.4.14",
+    "ts-jest": "^29.4.15",
     "typescript": "^5.9.3"
   }
 }
